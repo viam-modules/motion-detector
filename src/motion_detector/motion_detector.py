@@ -16,7 +16,9 @@ from viam.utils import ValueTypes
 from viam.logging import getLogger
 
 import cv2
+import math
 import numpy as np
+
 
 LOGGER = getLogger("MotionDetectorLogger")
 
@@ -52,6 +54,10 @@ class MotionDetector(Vision, Reconfigurable):
     @classmethod
     def validate_config(cls, config: ServiceConfig) -> Sequence[str]:
         source_cam = config.attributes.fields["cam_name"].string_value
+        sensitivity = config.attributes.fields["sensitivity"].number_value
+        if sensitivity < 0 or sensitivity > 1:
+            raise Exception(
+                "Sensitivity should be a number between 0 and 1")
         return [source_cam]
     
 
@@ -62,6 +68,7 @@ class MotionDetector(Vision, Reconfigurable):
 
         self.cam_name = config.attributes.fields["cam_name"].string_value
         self.camera = dependencies[Camera.get_resource_name(self.cam_name)]
+        self.sensitivity = config.attributes.fields["sensitivity"].number_value
 
         
     """
@@ -88,7 +95,7 @@ class MotionDetector(Vision, Reconfigurable):
         diff = cv2.absdiff(gray2,gray1)
         
         # Simple noise filtering via threshold (~10% of 255)
-        k = 25
+        k = math.floor((1-self.sensitivity) * 255)
         diff[diff<k] = 0
         diff[diff>k] = 1
 
