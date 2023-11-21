@@ -54,6 +54,10 @@ class MotionDetector(Vision, Reconfigurable):
     @classmethod
     def validate_config(cls, config: ServiceConfig) -> Sequence[str]:
         source_cam = config.attributes.fields["cam_name"].string_value
+        min_boxsize = config.attributes.fields["min_box_size"].number_value
+        if min_boxsize < 0:
+            raise Exception(
+                "Minimum bounding box size should be a positive integer")
         sensitivity = config.attributes.fields["sensitivity"].number_value
         if sensitivity < 0 or sensitivity > 1:
             raise Exception(
@@ -69,6 +73,7 @@ class MotionDetector(Vision, Reconfigurable):
         self.cam_name = config.attributes.fields["cam_name"].string_value
         self.camera = dependencies[Camera.get_resource_name(self.cam_name)]
         self.sensitivity = config.attributes.fields["sensitivity"].number_value
+        self.min_box_size = config.attributes.fields["min_box_size"].number_value
 
         
     """
@@ -115,7 +120,8 @@ class MotionDetector(Vision, Reconfigurable):
         if camera_name != self.cam_name:
             raise Exception(
                 "Camera name passed to method:",camera_name, "is not the configured source_cam:", self.cam_name)
-        return await self.get_classifications(image=None, count=count)
+        image = await self.camera.get_image()
+        return await self.get_classifications(image=image, count=count)
 
     # Not implemented for now. Eventually want this to return the location of the movement 
     async def get_detections(self,
@@ -124,8 +130,44 @@ class MotionDetector(Vision, Reconfigurable):
                             extra: Optional[Dict[str, Any]] = None,
                             timeout: Optional[float] = None,
                             **kwargs) -> List[Detection]:
-       # For now.
-       raise NotImplementedError
+        detections = []
+        # Grab and grayscale 2 images
+        input1 = await self.camera.get_image()
+        gray1 = cv2.cvtColor(np.array(input1), cv2.COLOR_BGR2GRAY)
+        input2 = await self.camera.get_image()
+        gray2 = cv2.cvtColor(np.array(input2), cv2.COLOR_BGR2GRAY)
+
+        # Frame difference
+        diff = cv2.absdiff(gray2,gray1)
+        
+        # Simple noise filtering via threshold (~10% of 255)
+        k = math.floor((1-self.sensitivity) * 255)
+        diff[diff<k] = 0
+        diff[diff>k] = 255
+
+        # Morphological operations to remove noise and blob 
+        kernel = np.ones((3, 3), np.uint8) 
+        kernel2 = np.ones((15, 15), np.uint8) 
+        img = cv2.erode(diff, kernel)
+        img2 = cv2.dilate(img, kernel)
+        img3 = cv2.dilate(img2, kernel2)
+        imgOut = cv2.erode(img3, kernel2)
+
+        # List points around the remaining blobs
+        contours, h = cv2.findContours(imgOut, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) 
+
+        # Make boxes from the contours
+        for c in contours: 
+            # Each contour should be a box.
+            xs = [pt[0][0] for pt in c]
+            ys = [pt[0][1] for pt in c]
+            xmin, xmax, ymin, ymax = min(xs), max(xs), min(ys), max(ys)
+            # Add to list of detections if big enough
+            if (ymax-ymin)*(xmax-xmin) > self.min_box_size: 
+                detections.append({ "confidence": 0.5, "class_name": "motion", 
+                            "x_min": int(xmin), "y_min": int(ymin), "x_max": int(xmax), "y_max": int(ymax) })
+
+        return detections
 
     async def get_detections_from_camera(self,
                                         camera_name: str,
@@ -134,8 +176,10 @@ class MotionDetector(Vision, Reconfigurable):
                                         timeout: Optional[float] = None,
                                         **kwargs) -> List[Detection]:
 
-        # For now.
-        raise NotImplementedError
+        if camera_name != self.cam_name:
+            raise Exception(
+                "Camera name passed to method:",camera_name, "is not the configured source_cam:", self.cam_name)
+        return await self.get_detections(image=None)
     
     async def get_object_point_clouds(self,
                                       camera_name: str,

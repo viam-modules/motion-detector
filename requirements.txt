@@ -1,4 +1,3 @@
 viam-sdk
 opencv-python
 pillow
-math
