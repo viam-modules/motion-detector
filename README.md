@@ -55,7 +55,7 @@ The following attributes are available for `viam:vision:aws-sagemaker` vision se
 | ---- | ---- | --------- | ----------- |
 | `cam_name` | string | **Required** | The name of the camera configured on your robot. |
 | `min_box_size` | int | **Required** | The size (in square pixels) of the smallest bounding box to allow. Relevant for GetDetections/GetDetectionsFromCamera only.
-| `sensitivity` | float | **Required** | A number from 0 - 1. Larger numbers will make the module more sensitive to motion. Default = 0.9 |
+| `sensitivity` | float | **Optional** | A number from 0 - 1. Larger numbers will make the module more sensitive to motion. Default = 0.9 |
 
 ### Usage
 
