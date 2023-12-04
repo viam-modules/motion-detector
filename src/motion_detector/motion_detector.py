@@ -73,6 +73,8 @@ class MotionDetector(Vision, Reconfigurable):
         self.cam_name = config.attributes.fields["cam_name"].string_value
         self.camera = dependencies[Camera.get_resource_name(self.cam_name)]
         self.sensitivity = config.attributes.fields["sensitivity"].number_value
+        if self.sensitivity == 0:
+            self.sensitivity = 0.9
         self.min_box_size = config.attributes.fields["min_box_size"].number_value
 
         
