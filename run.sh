@@ -2,6 +2,7 @@
 cd `dirname $0`
 
 # Create a virtual environment to run our code
+pip install virtualenv
 VENV_NAME="venv"
 PYTHON="$VENV_NAME/bin/python"
 

@@ -1,0 +1,13 @@
+{
+    "module_id": "viam:motion-detector",
+    "visibility": "public",
+    "url": "https://github.com/viam-labs/motion-detector/",
+    "description": "Module of the Viam vision service that detects motion via camera.",
+    "models": [
+      {
+        "api": "rdk:service:vision",
+        "model": "viam:vision:motion-detector"
+      }
+    ],
+    "entrypoint": "run.sh"
+  }
