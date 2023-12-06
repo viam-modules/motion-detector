@@ -49,7 +49,7 @@ Navigate to the **Config** tab of your robot’s page in [the Viam app](https://
 
 ### Attributes
 
-The following attributes are available for `viam:vision:aws-sagemaker` vision services:
+The following attributes are available for `viam:vision:motion-detector` vision services:
 
 | Name | Type | Inclusion | Description |
 | ---- | ---- | --------- | ----------- |
