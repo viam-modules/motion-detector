@@ -1,10 +1,9 @@
 from io import BytesIO
 from typing import ClassVar, List, Mapping, Sequence, Any, Dict, Optional, Union, cast
 from typing_extensions import Self
-from PIL import Image
 
 from viam.components.camera import Camera
-from viam.media.video import RawImage, CameraMimeType
+from viam.media.video import ViamImage
 from viam.proto.service.vision import Classification, Detection
 from viam.services.vision import Vision
 from viam.module.types import Reconfigurable
@@ -86,7 +85,7 @@ class MotionDetector(Vision, Reconfigurable):
     # This will be the main method implemented in this module. 
     # Given a camera. Perform frame differencing and return how much of the image is moving
     async def get_classifications(self,
-                                 image: Union[Image.Image, RawImage],
+                                 image: ViamImage,
                                  count: int,
                                  *, 
                                  extra: Optional[Dict[str, Any]] = None,
@@ -127,7 +126,7 @@ class MotionDetector(Vision, Reconfigurable):
 
     # Not implemented for now. Eventually want this to return the location of the movement 
     async def get_detections(self,
-                            image: Union[Image.Image, RawImage],
+                            image: ViamImage,
                             *,
                             extra: Optional[Dict[str, Any]] = None,
                             timeout: Optional[float] = None,
