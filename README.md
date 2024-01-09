@@ -1,6 +1,6 @@
 # motion-detector
 
-Viam provides a `motion-detector` model of the [vision service](/services/vision) with which you can detect the occarance and location of movement.
+Viam provides a `motion-detector` model of the [vision service](/services/vision) with which you can detect the occurance and location of movement.
 
 To transform your camera into a motion detecting camera, configure this vision service as a [modular resource](https://docs.viam.com/modular-resources/) on your robot.
 
