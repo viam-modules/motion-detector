@@ -1,12 +1,12 @@
 # motion-detector
 
-Viam provides a `motion-detector` model of the [vision service](/services/vision) with which you can see when/where there is movement.
+Viam provides a `motion-detector` model of the [vision service](/services/vision) with which you can detect the occurance and location of movement.
 
-Configure this vision service as a [modular resource](https://docs.viam.com/modular-resources/) on your robot to transform your camera into a motion detecting camera!
+To transform your camera into a motion detecting camera, configure this vision service as a [modular resource](https://docs.viam.com/modular-resources/) on your robot.
 
 ## Getting started
 
-The first step is to configure a camera on your robot.  [Here](https://docs.viam.com/components/camera/webcam/) is an example of how to configure a webcam. Remember the name given to the camera, it will be important later.
+Start by [configuring a camera](https://docs.viam.com/components/camera/webcam/) on your robot. Remember the name you give to the camera, it will be important later.
 
 > [!NOTE]  
 > Before configuring your camera or vision service, you must [create a robot](https://docs.viam.com/manage/fleet/robots/#add-a-new-robot).
@@ -83,8 +83,18 @@ When returning classifications, the module will always return a single classific
 The `confidence` of the classification will be a percentage equal to the percentage of the image that moved (more than a threshold determined by the sensitivity attribute).
 
 When returning detections, the module will return a list of detections with bounding boxes that encapsulate the movement. 
-The `class_name` will be "motion" and the `confidence` will be 0.5. 
+The `class_name` will be "motion" and the `confidence` will always be 0.5. 
 
 ## Visualize 
 
 Once the `viam:vision:motion-detector` modular service is in use, configure a [transform camera](https://docs.viam.com/components/camera/transform/) to see classifications or detections appear in your robot's field of vision.
+
+## Next Steps
+
+- To test your motion detector, configure a [transform camera](https://docs.viam.com/components/camera/transform/) to see classifications or detections appear in your robot's field of vision from the [**Control** tab](https://docs.viam.com/manage/fleet/robots/#control).
+- To write code to use the motion detector output, use one of the [available SDKs](https://docs.viam.com/program/).
+
+## License
+
+Copyright 2021-2023 Viam Inc. <br>
+Apache 2.0
