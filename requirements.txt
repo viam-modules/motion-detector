@@ -1,3 +1,4 @@
 pip == 23.3.1
 viam-sdk == 0.11.0  
 opencv-python == 4.7.0.72
+pyinstaller==6.3.0
