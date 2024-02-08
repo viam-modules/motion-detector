@@ -46,7 +46,9 @@ class MotionDetector(Vision, Reconfigurable):
                  config: ServiceConfig,
                  dependencies: Mapping[ResourceName, ResourceBase]) -> Self:
         service = cls(config.name)
+        print("hello5")
         service.reconfigure(config, dependencies)
+        print("hello6")
         return service
 
     # Validates JSON Configuration

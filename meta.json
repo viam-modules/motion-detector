@@ -9,10 +9,5 @@
         "model": "viam:vision:motion-detector"
       }
     ],
-    "build": {
-    "build": "sh build.sh",
-    "path": "dist/archive.tar.gz",
-    "arch" : ["linux/arm64", "darwin/arm64", "darwin/amd64", "linux/amd64"]
-  },
-  "entrypoint": "dist/main"
+  "entrypoint": "run.sh"
   }
