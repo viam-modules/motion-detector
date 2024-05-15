@@ -15,8 +15,10 @@ from viam.utils import ValueTypes
 from viam.logging import getLogger
 
 import cv2
+import io
 import math
 import numpy as np
+from PIL import Image
 
 
 LOGGER = getLogger("MotionDetectorLogger")
@@ -46,9 +48,7 @@ class MotionDetector(Vision, Reconfigurable):
                  config: ServiceConfig,
                  dependencies: Mapping[ResourceName, ResourceBase]) -> Self:
         service = cls(config.name)
-        print("hello5")
         service.reconfigure(config, dependencies)
-        print("hello6")
         return service
 
     # Validates JSON Configuration
@@ -136,9 +136,11 @@ class MotionDetector(Vision, Reconfigurable):
         detections = []
         # Grab and grayscale 2 images
         input1 = await self.camera.get_image()
-        gray1 = cv2.cvtColor(np.array(input1), cv2.COLOR_BGR2GRAY)
+        img1 = Image.open(io.BytesIO(input1.data))
+        gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
         input2 = await self.camera.get_image()
-        gray2 = cv2.cvtColor(np.array(input2), cv2.COLOR_BGR2GRAY)
+        img2 = Image.open(io.BytesIO(input2.data))
+        gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
 
         # Frame difference
         diff = cv2.absdiff(gray2,gray1)
