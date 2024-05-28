@@ -95,13 +95,13 @@ class MotionDetector(Vision, Reconfigurable):
                                  **kwargs) -> List[Classification]:
         # Grab and grayscale 2 images
         input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
-        if input1.mime_type != CameraMimeType.JPEG and input1.mime_type != CameraMimeType.PNG:
+        if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
             raise Exception("camera mime type must be PNG or JPEG, not ", input1.mime_type)
         img1 = Image.open(io.BytesIO(input1.data))
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
         input2 = await self.camera.get_image()
-        if input2.mime_type != CameraMimeType.JPEG and input2.mime_type != CameraMimeType.PNG:
+        if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
             raise Exception("camera mime type must be PNG or JPEG, not ", input2.mime_type)
         img2 = Image.open(io.BytesIO(input2.data))
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
@@ -144,13 +144,13 @@ class MotionDetector(Vision, Reconfigurable):
 
         # Grab and grayscale 2 images
         input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
-        if input1.mime_type != CameraMimeType.JPEG and input1.mime_type != CameraMimeType.PNG:
+        if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
             raise Exception("camera mime type must be PNG or JPEG, not ", input1.mime_type)
         img1 = Image.open(io.BytesIO(input1.data))
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
         input2 = await self.camera.get_image()
-        if input2.mime_type != CameraMimeType.JPEG and input2.mime_type != CameraMimeType.PNG:
+        if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
             raise Exception("camera mime type must be PNG or JPEG, not ", input2.mime_type)
         img2 = Image.open(io.BytesIO(input2.data))
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
@@ -233,7 +233,7 @@ class MotionDetector(Vision, Reconfigurable):
         if camera_name != self.cam_name:
             raise Exception(
                 "Camera name passed to method:",camera_name, "is not the configured 'cam_name':", self.cam_name)
-        img = await self.camera.get_image(mime_type="image/jpeg")
+        img = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
         if return_image:
             result.image = img
         if return_classifications:
