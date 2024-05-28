@@ -3,7 +3,7 @@ from typing import ClassVar, List, Mapping, Sequence, Any, Dict, Optional, Union
 from typing_extensions import Self
 
 from viam.components.camera import Camera
-from viam.media.video import ViamImage
+from viam.media.video import ViamImage, CameraMimeType
 from viam.proto.service.vision import Classification, Detection
 from viam.services.vision import Vision, CaptureAllResult
 from viam.module.types import Reconfigurable
@@ -13,7 +13,6 @@ from viam.resource.base import ResourceBase
 from viam.resource.types import Model, ModelFamily
 from viam.utils import ValueTypes
 from viam.logging import getLogger
-
 
 import cv2
 import io
@@ -95,10 +94,15 @@ class MotionDetector(Vision, Reconfigurable):
                                  timeout: Optional[float] = None,
                                  **kwargs) -> List[Classification]:
         # Grab and grayscale 2 images
-        input1 = await self.camera.get_image()
+        input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
+        if input1.mime_type != CameraMimeType.JPEG and input1.mime_type != CameraMimeType.PNG:
+            raise Exception("camera mime type must be PNG or JPEG, not ", input1.mime_type)
         img1 = Image.open(io.BytesIO(input1.data))
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
+
         input2 = await self.camera.get_image()
+        if input2.mime_type != CameraMimeType.JPEG and input2.mime_type != CameraMimeType.PNG:
+            raise Exception("camera mime type must be PNG or JPEG, not ", input2.mime_type)
         img2 = Image.open(io.BytesIO(input2.data))
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
         
@@ -137,11 +141,17 @@ class MotionDetector(Vision, Reconfigurable):
                             timeout: Optional[float] = None,
                             **kwargs) -> List[Detection]:
         detections = []
+
         # Grab and grayscale 2 images
-        input1 = await self.camera.get_image()
+        input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
+        if input1.mime_type != CameraMimeType.JPEG and input1.mime_type != CameraMimeType.PNG:
+            raise Exception("camera mime type must be PNG or JPEG, not ", input1.mime_type)
         img1 = Image.open(io.BytesIO(input1.data))
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
+
         input2 = await self.camera.get_image()
+        if input2.mime_type != CameraMimeType.JPEG and input2.mime_type != CameraMimeType.PNG:
+            raise Exception("camera mime type must be PNG or JPEG, not ", input2.mime_type)
         img2 = Image.open(io.BytesIO(input2.data))
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
 
