@@ -223,7 +223,6 @@ class MotionDetector(Vision, Reconfigurable):
         if camera_name != self.cam_name:
             raise Exception(
                 "Camera name passed to method:",camera_name, "is not the configured 'cam_name':", self.cam_name)
-        self.camera.get_image()
         img = await self.camera.get_image(mime_type="image/jpeg")
         if return_image:
             result.image = img
