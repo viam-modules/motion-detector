@@ -3,9 +3,9 @@ from typing import ClassVar, List, Mapping, Sequence, Any, Dict, Optional, Union
 from typing_extensions import Self
 
 from viam.components.camera import Camera
-from viam.media.video import ViamImage
+from viam.media.video import ViamImage, CameraMimeType
 from viam.proto.service.vision import Classification, Detection
-from viam.services.vision import Vision
+from viam.services.vision import Vision, CaptureAllResult
 from viam.module.types import Reconfigurable
 from viam.proto.app.robot import ServiceConfig
 from viam.proto.common import PointCloudObject, ResourceName
@@ -94,9 +94,16 @@ class MotionDetector(Vision, Reconfigurable):
                                  timeout: Optional[float] = None,
                                  **kwargs) -> List[Classification]:
         # Grab and grayscale 2 images
-        img1 = await self.camera.get_image()
+        input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
+        if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
+            raise Exception("image mime type must be PNG or JPEG, not ", input1.mime_type)
+        img1 = Image.open(io.BytesIO(input1.data))
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
-        img2 = await self.camera.get_image()
+
+        input2 = await self.camera.get_image()
+        if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
+            raise Exception("image mime type must be PNG or JPEG, not ", input2.mime_type)
+        img2 = Image.open(io.BytesIO(input2.data))
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
         
         # Frame difference
@@ -122,7 +129,7 @@ class MotionDetector(Vision, Reconfigurable):
                                               **kwargs) -> List[Classification]:
         if camera_name != self.cam_name:
             raise Exception(
-                "Camera name passed to method:",camera_name, "is not the configured source_cam:", self.cam_name)
+                "Camera name passed to method:",camera_name, "is not the configured 'cam_name'", self.cam_name)
         image = await self.camera.get_image()
         return await self.get_classifications(image=image, count=count)
 
@@ -134,11 +141,17 @@ class MotionDetector(Vision, Reconfigurable):
                             timeout: Optional[float] = None,
                             **kwargs) -> List[Detection]:
         detections = []
+
         # Grab and grayscale 2 images
-        input1 = await self.camera.get_image()
+        input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
+        if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
+            raise Exception("image mime type must be PNG or JPEG, not ", input1.mime_type)
         img1 = Image.open(io.BytesIO(input1.data))
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
+
         input2 = await self.camera.get_image()
+        if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
+            raise Exception("image mime type must be PNG or JPEG, not ", input2.mime_type)
         img2 = Image.open(io.BytesIO(input2.data))
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
 
@@ -183,7 +196,7 @@ class MotionDetector(Vision, Reconfigurable):
 
         if camera_name != self.cam_name:
             raise Exception(
-                "Camera name passed to method:",camera_name, "is not the configured source_cam:", self.cam_name)
+                "Camera name passed to method:",camera_name, "is not the configured 'cam_name':", self.cam_name)
         return await self.get_detections(image=None)
     
     async def get_object_point_clouds(self,
@@ -193,6 +206,44 @@ class MotionDetector(Vision, Reconfigurable):
                                       timeout: Optional[float] = None,
                                       **kwargs) -> List[PointCloudObject]:
         raise NotImplementedError
+    
+    async def get_properties(
+            self,
+            *,
+            extra: Optional[Mapping[str, Any]] = None,
+            timeout: Optional[float] = None) -> Vision.Properties:
+                return Vision.Properties(
+                classifications_supported=True,
+                detections_supported=True,
+                object_point_clouds_supported=False,
+        )
+        
+    async def capture_all_from_camera(
+        self,
+        camera_name: str,
+        return_image: bool = False,
+        return_classifications: bool = False,
+        return_detections: bool = False,
+        return_object_point_clouds: bool = False,
+        *,
+        extra: Optional[Mapping[str, Any]] = None,
+        timeout: Optional[float] = None,
+    ) -> CaptureAllResult:
+        result = CaptureAllResult()
+        if camera_name != self.cam_name:
+            raise Exception(
+                "Camera name passed to method:",camera_name, "is not the configured 'cam_name':", self.cam_name)
+        img = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
+        if return_image:
+            result.image = img
+        if return_classifications:
+            classifs = await self.get_classifications(img, 1)
+            result.classifications = classifs
+        if return_detections:
+            dets = await self.get_detections(img)
+            result.detections = dets 
+        # No object point clouds
+        return result
     
     async def do_command(self,
                         command: Mapping[str, ValueTypes],
