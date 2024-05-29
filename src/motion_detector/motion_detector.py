@@ -96,13 +96,13 @@ class MotionDetector(Vision, Reconfigurable):
         # Grab and grayscale 2 images
         input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
         if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception("camera mime type must be PNG or JPEG, not ", input1.mime_type)
+            raise Exception("image mime type must be PNG or JPEG, not ", input1.mime_type)
         img1 = Image.open(io.BytesIO(input1.data))
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
         input2 = await self.camera.get_image()
         if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception("camera mime type must be PNG or JPEG, not ", input2.mime_type)
+            raise Exception("image mime type must be PNG or JPEG, not ", input2.mime_type)
         img2 = Image.open(io.BytesIO(input2.data))
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
         
@@ -145,13 +145,13 @@ class MotionDetector(Vision, Reconfigurable):
         # Grab and grayscale 2 images
         input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
         if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception("camera mime type must be PNG or JPEG, not ", input1.mime_type)
+            raise Exception("image mime type must be PNG or JPEG, not ", input1.mime_type)
         img1 = Image.open(io.BytesIO(input1.data))
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
         input2 = await self.camera.get_image()
         if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception("camera mime type must be PNG or JPEG, not ", input2.mime_type)
+            raise Exception("image mime type must be PNG or JPEG, not ", input2.mime_type)
         img2 = Image.open(io.BytesIO(input2.data))
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
 
@@ -244,11 +244,6 @@ class MotionDetector(Vision, Reconfigurable):
             result.detections = dets 
         # No object point clouds
         return result
-
-        
-
-        
-
     
     async def do_command(self,
                         command: Mapping[str, ValueTypes],
