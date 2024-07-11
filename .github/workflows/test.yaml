@@ -19,7 +19,7 @@ jobs:
 
     - name: Run lint
       run: |
-        make lint-check
+        make lint
 
     - name: Run unit tests
       run: make test
