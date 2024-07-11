@@ -1,8 +1,9 @@
-import cv2
 import math
-import numpy as np
 from typing import ClassVar, List, Mapping, Sequence, Any, Dict, Optional
 from typing_extensions import Self
+import cv2
+import numpy as np
+
 
 from viam.components.camera import Camera
 from viam.media.video import ViamImage, CameraMimeType
@@ -261,10 +262,10 @@ class MotionDetector(Vision, Reconfigurable):
         img = cv2.erode(diff, kernel)
         img2 = cv2.dilate(img, kernel)
         img3 = cv2.dilate(img2, kernel2)
-        imgOut = cv2.erode(img3, kernel2)
+        img_out = cv2.erode(img3, kernel2)
 
         # List points around the remaining blobs
-        contours, h = cv2.findContours(imgOut, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        contours, _ = cv2.findContours(img_out, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
         # Make boxes from the contours
         for c in contours:
