@@ -1,3 +1,4 @@
 pillow == 10.0.1
-viam-sdk 
+viam-sdk
+pyinstaller
 opencv-python == 4.9.0.80
