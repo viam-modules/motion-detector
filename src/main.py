@@ -15,11 +15,15 @@ async def main():
     Registry.register_resource_creator(
         Vision.SUBTYPE,
         MotionDetector.MODEL,
-        ResourceCreatorRegistration(MotionDetector.new_service, MotionDetector.validate_config))
+        ResourceCreatorRegistration(
+            MotionDetector.new_service, MotionDetector.validate_config
+        ),
+    )
     module = Module.from_args()
 
     module.add_model_from_registry(Vision.SUBTYPE, MotionDetector.MODEL)
     await module.start()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
