@@ -1,2 +1,8 @@
-module.tar.gz: requirements.txt *.sh src/*.py
-	tar czf module.tar.gz $^
+build:
+	./build.sh
+	
+test:
+	PYTHONPATH=./src pytest
+	
+dist/archive.tar.gz:
+	tar -czvf dist/archive.tar.gz dist/main
