@@ -1,6 +1,9 @@
-from io import BytesIO
-from typing import ClassVar, List, Mapping, Sequence, Any, Dict, Optional, Union, cast
+import math
+from typing import ClassVar, List, Mapping, Sequence, Any, Dict, Optional
 from typing_extensions import Self
+import cv2
+import numpy as np
+
 
 from viam.components.camera import Camera
 from viam.media.video import ViamImage, CameraMimeType
@@ -15,14 +18,11 @@ from viam.resource.types import Model, ModelFamily
 from viam.utils import ValueTypes
 from viam.logging import getLogger
 
-import cv2
-import io
-import math
-import numpy as np
-from PIL import Image
+
 
 
 LOGGER = getLogger("MotionDetectorLogger")
+
 
 class MotionDetector(Vision, Reconfigurable):
     """
@@ -45,9 +45,9 @@ class MotionDetector(Vision, Reconfigurable):
 
     # Constructor
     @classmethod
-    def new_service(cls,
-                 config: ServiceConfig,
-                 dependencies: Mapping[ResourceName, ResourceBase]) -> Self:
+    def new_service(
+        cls, config: ServiceConfig, dependencies: Mapping[ResourceName, ResourceBase]
+    ) -> Self:
         service = cls(config.name)
         service.reconfigure(config, dependencies)
         return service
@@ -58,20 +58,16 @@ class MotionDetector(Vision, Reconfigurable):
         source_cam = config.attributes.fields["cam_name"].string_value
         min_boxsize = config.attributes.fields["min_box_size"].number_value
         if min_boxsize < 0:
-            raise Exception(
-                "Minimum bounding box size should be a positive integer")
+            raise Exception("Minimum bounding box size should be a positive integer")
         sensitivity = config.attributes.fields["sensitivity"].number_value
         if sensitivity < 0 or sensitivity > 1:
-            raise Exception(
-                "Sensitivity should be a number between 0 and 1")
+            raise Exception("Sensitivity should be a number between 0 and 1")
         return [source_cam]
-    
 
     # Handles attribute reconfiguration
-    def reconfigure(self,
-                    config: ServiceConfig,
-                    dependencies: Mapping[ResourceName, ResourceBase]):
-
+    def reconfigure(
+        self, config: ServiceConfig, dependencies: Mapping[ResourceName, ResourceBase]
+    ):
         self.cam_name = config.attributes.fields["cam_name"].string_value
         self.camera = dependencies[Camera.get_resource_name(self.cam_name)]
         self.sensitivity = config.attributes.fields["sensitivity"].number_value
@@ -79,105 +75,122 @@ class MotionDetector(Vision, Reconfigurable):
             self.sensitivity = 0.9
         self.min_box_size = config.attributes.fields["min_box_size"].number_value
 
-        
-    """
-    Implement the methods the Viam RDK defines for the vision service API
-    (rdk:service:vision)
-    """
-
-    # This will be the main method implemented in this module. 
+    # This will be the main method implemented in this module.
     # Given a camera. Perform frame differencing and return how much of the image is moving
-    async def get_classifications(self,
-                                 image: ViamImage,
-                                 count: int,
-                                 *, 
-                                 extra: Optional[Dict[str, Any]] = None,
-                                 timeout: Optional[float] = None,
-                                 **kwargs) -> List[Classification]:
-       
+    async def get_classifications(
+        self,
+        image: ViamImage,
+        count: int,
+        *,
+        extra: Optional[Dict[str, Any]] = None,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ) -> List[Classification]:
         # Grab and grayscale 2 images
         input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
         if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception("image mime type must be PNG or JPEG, not ", input1.mime_type)
+            raise Exception(
+                "image mime type must be PNG or JPEG, not ", input1.mime_type
+            )
         img1 = pil.viam_to_pil_image(input1)
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
         input2 = await self.camera.get_image()
         if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception("image mime type must be PNG or JPEG, not ", input2.mime_type)
+            raise Exception(
+                "image mime type must be PNG or JPEG, not ", input2.mime_type
+            )
         img2 = pil.viam_to_pil_image(input2)
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
-        
+
         return self.classification_from_gray_imgs(gray1=gray1, gray2=gray2)
 
-
-    async def get_classifications_from_camera(self, 
-                                              camera_name: str, 
-                                              count: int, 
-                                              *,
-                                              extra: Optional[Dict[str, Any]] = None,
-                                              timeout: Optional[float] = None,
-                                              **kwargs) -> List[Classification]:
+    async def get_classifications_from_camera(
+        self,
+        camera_name: str,
+        count: int,
+        *,
+        extra: Optional[Dict[str, Any]] = None,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ) -> List[Classification]:
         if camera_name != self.cam_name:
             raise Exception(
-                "Camera name passed to method:",camera_name, "is not the configured 'cam_name'", self.cam_name)
+                "Camera name passed to method:",
+                camera_name,
+                "is not the configured 'cam_name'",
+                self.cam_name,
+            )
         image = await self.camera.get_image()
         return await self.get_classifications(image=image, count=count)
 
-    # Not implemented for now. Eventually want this to return the location of the movement 
-    async def get_detections(self,
-                            image: ViamImage,
-                            *,
-                            extra: Optional[Dict[str, Any]] = None,
-                            timeout: Optional[float] = None,
-                            **kwargs) -> List[Detection]:
-
+    # Not implemented for now. Eventually want this to return the location of the movement
+    async def get_detections(
+        self,
+        image: ViamImage,
+        *,
+        extra: Optional[Dict[str, Any]] = None,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ) -> List[Detection]:
         # Grab and grayscale 2 images
         input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
         if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception("image mime type must be PNG or JPEG, not ", input1.mime_type)
+            raise Exception(
+                "image mime type must be PNG or JPEG, not ", input1.mime_type
+            )
         img1 = pil.viam_to_pil_image(input1)
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
         input2 = await self.camera.get_image()
         if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception("image mime type must be PNG or JPEG, not ", input2.mime_type)
+            raise Exception(
+                "image mime type must be PNG or JPEG, not ", input2.mime_type
+            )
         img2 = pil.viam_to_pil_image(input2)
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
 
         return self.detections_from_gray_imgs(gray1, gray2)
 
-    async def get_detections_from_camera(self,
-                                        camera_name: str,
-                                        *,
-                                        extra: Optional[Dict[str, Any]] = None,
-                                        timeout: Optional[float] = None,
-                                        **kwargs) -> List[Detection]:
-
+    async def get_detections_from_camera(
+        self,
+        camera_name: str,
+        *,
+        extra: Optional[Dict[str, Any]] = None,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ) -> List[Detection]:
         if camera_name != self.cam_name:
             raise Exception(
-                "Camera name passed to method:",camera_name, "is not the configured 'cam_name':", self.cam_name)
+                "Camera name passed to method:",
+                camera_name,
+                "is not the configured 'cam_name':",
+                self.cam_name,
+            )
         return await self.get_detections(image=None)
-    
-    async def get_object_point_clouds(self,
-                                      camera_name: str,
-                                      *,
-                                      extra: Optional[Dict[str, Any]] = None,
-                                      timeout: Optional[float] = None,
-                                      **kwargs) -> List[PointCloudObject]:
+
+    async def get_object_point_clouds(
+        self,
+        camera_name: str,
+        *,
+        extra: Optional[Dict[str, Any]] = None,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ) -> List[PointCloudObject]:
         raise NotImplementedError
-    
+
     async def get_properties(
-            self,
-            *,
-            extra: Optional[Mapping[str, Any]] = None,
-            timeout: Optional[float] = None) -> Vision.Properties:
-                return Vision.Properties(
-                classifications_supported=True,
-                detections_supported=True,
-                object_point_clouds_supported=False,
+        self,
+        *,
+        extra: Optional[Mapping[str, Any]] = None,
+        timeout: Optional[float] = None,
+    ) -> Vision.Properties:
+        return Vision.Properties(
+            classifications_supported=True,
+            detections_supported=True,
+            object_point_clouds_supported=False,
         )
-        
+
     async def capture_all_from_camera(
         self,
         camera_name: str,
@@ -190,9 +203,13 @@ class MotionDetector(Vision, Reconfigurable):
         timeout: Optional[float] = None,
     ) -> CaptureAllResult:
         result = CaptureAllResult()
-        if (camera_name != self.cam_name) and (camera_name != ""):
+        if camera_name not in (self.cam_name, ""):
             raise Exception(
-                "Camera name passed to method:",camera_name, "is not the configured 'cam_name':", self.cam_name)
+                "Camera name passed to method:",
+                camera_name,
+                "is not the configured 'cam_name':",
+                self.cam_name,
+            )
         img = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
         if return_image:
             result.image = img
@@ -201,63 +218,72 @@ class MotionDetector(Vision, Reconfigurable):
             result.classifications = classifs
         if return_detections:
             dets = await self.get_detections(img)
-            result.detections = dets 
+            result.detections = dets
         # No object point clouds
         return result
-    
-    async def do_command(self,
-                        command: Mapping[str, ValueTypes],
-                        *,
-                        timeout: Optional[float] = None,
-                        **kwargs):
+
+    async def do_command(
+        self,
+        command: Mapping[str, ValueTypes],
+        *,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ):
         raise NotImplementedError
-    
+
     def classification_from_gray_imgs(self, gray1, gray2):
-         # Frame difference
-        diff = cv2.absdiff(gray2,gray1)
-        
+        # Frame difference
+        diff = cv2.absdiff(gray2, gray1)
+
         # Simple noise filtering via threshold (~10% of 255)
-        k = math.floor((1-self.sensitivity) * 255)
-        diff[diff<k] = 0
-        diff[diff>k] = 1
+        k = math.floor((1 - self.sensitivity) * 255)
+        diff[diff < k] = 0
+        diff[diff > k] = 1
 
         # Confidence = percent of activated pixels (after thresholding)
         conf = np.sum(diff) / (gray1.shape[0] * gray1.shape[1])
 
         classifications = [{"class_name": "motion", "confidence": conf}]
         return classifications
-    
 
     def detections_from_gray_imgs(self, gray1, gray2):
         detections = []
         # Frame difference
-        diff = cv2.absdiff(gray2,gray1)
-        
-        # Simple noise filtering via threshold (~10% of 255)
-        k = math.floor((1-self.sensitivity) * 255)
-        diff[diff<k] = 0
-        diff[diff>k] = 255
+        diff = cv2.absdiff(gray2, gray1)
 
-        # Morphological operations to remove noise and blob 
-        kernel = np.ones((3, 3), np.uint8) 
-        kernel2 = np.ones((15, 15), np.uint8) 
+        # Simple noise filtering via threshold (~10% of 255)
+        k = math.floor((1 - self.sensitivity) * 255)
+        diff[diff < k] = 0
+        diff[diff > k] = 255
+
+        # Morphological operations to remove noise and blob
+        kernel = np.ones((3, 3), np.uint8)
+        kernel2 = np.ones((15, 15), np.uint8)
         img = cv2.erode(diff, kernel)
         img2 = cv2.dilate(img, kernel)
         img3 = cv2.dilate(img2, kernel2)
-        imgOut = cv2.erode(img3, kernel2)
+        img_out = cv2.erode(img3, kernel2)
 
         # List points around the remaining blobs
-        contours, h = cv2.findContours(imgOut, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) 
+        contours, _ = cv2.findContours(img_out, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
         # Make boxes from the contours
-        for c in contours: 
+        for c in contours:
             # Each contour should be a box.
             xs = [pt[0][0] for pt in c]
             ys = [pt[0][1] for pt in c]
             xmin, xmax, ymin, ymax = min(xs), max(xs), min(ys), max(ys)
             # Add to list of detections if big enough
-            if (ymax-ymin)*(xmax-xmin) > self.min_box_size: 
-                detections.append({ "confidence": 0.5, "class_name": "motion", 
-                            "x_min": int(xmin), "y_min": int(ymin), "x_max": int(xmax), "y_max": int(ymax) })
+            if (ymax - ymin) * (xmax - xmin) > self.min_box_size:
+                detections.append(
+                    {
+                        "confidence": 0.5,
+                        "class_name": "motion",
+                        "x_min": int(xmin),
+                        "y_min": int(ymin),
+                        "x_max": int(xmax),
+                        "y_max": int(ymax),
+                    }
+                )
 
         return detections
