@@ -1,5 +1,7 @@
 pillow == 10.0.1
+numpy==2.0.0
 viam-sdk
 pyinstaller
 pylint
+pytest
 opencv-python == 4.9.0.80
