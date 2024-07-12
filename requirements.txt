@@ -1,5 +1,4 @@
 pillow == 10.0.1
-numpy
 viam-sdk
 pyinstaller
 pylint
