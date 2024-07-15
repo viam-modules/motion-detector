@@ -56,6 +56,8 @@ class MotionDetector(Vision, Reconfigurable):
     @classmethod
     def validate_config(cls, config: ServiceConfig) -> Sequence[str]:
         source_cam = config.attributes.fields["cam_name"].string_value
+        if source_cam == "":
+            raise Exception("Source camera must be provided as 'cam_name'")
         min_boxsize = config.attributes.fields["min_box_size"].number_value
         if min_boxsize < 0:
             raise Exception("Minimum bounding box size should be a positive integer")

@@ -1,4 +1,4 @@
-build:
+setup:
 	./build.sh
 	
 test:

@@ -3,12 +3,22 @@ from tests.fakecam import FakeCamera
 from PIL import Image
 from unittest.mock import MagicMock, patch
 from viam.components.camera import Camera
+from viam.proto.app.robot import ComponentConfig
+from google.protobuf.struct_pb2 import Struct
 from viam.services.vision import CaptureAllResult, Classification, Detection
-from typing import List
+from typing import List, Mapping, Any
 
 import pytest
 import cv2
 import numpy as np
+
+def make_component_config(dictionary: Mapping[str, Any]) -> ComponentConfig:
+        struct = Struct()
+        struct.update(dictionary=dictionary)
+        return ComponentConfig(attributes=struct)
+
+   
+
 
 class TestMotionDetector:
 
@@ -19,10 +29,18 @@ class TestMotionDetector:
         md.cam_name = "test"
         md.camera = FakeCamera("test")
         return md
+    
 
-    def test_blah(self):
-        x = "blah"
-        assert "h" in x
+    def test_validate(self):
+        md = self.getMD()
+        empty_config = make_component_config({})
+        config =make_component_config({
+            "cam_name": "test"
+        })
+        with pytest.raises(Exception):
+            response = md.validate_config(config=empty_config)
+        response = md.validate_config(config=config)
+
 
     def test_classifications(self):
         img1 = Image.open("tests/img1.jpg")
