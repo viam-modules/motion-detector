@@ -1,7 +1,7 @@
 pillow == 10.0.1
 numpy == 1.25.0
-viam-sdk
+viam-sdk>=0.27
 pyinstaller
 pylint
 pytest
-opencv-python == 4.9.0.80
+opencv-python-headless == 4.9.0.80
