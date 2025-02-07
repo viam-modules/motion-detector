@@ -4,4 +4,5 @@ viam-sdk
 pyinstaller
 pylint
 pytest
+pytest-asyncio
 opencv-python == 4.9.0.80
