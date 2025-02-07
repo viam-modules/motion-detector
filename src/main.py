@@ -13,7 +13,7 @@ async def main():
     registry before the module adds the resource model.
     """
     Registry.register_resource_creator(
-        Vision.SUBTYPE,
+        Vision.API,
         MotionDetector.MODEL,
         ResourceCreatorRegistration(
             MotionDetector.new_service, MotionDetector.validate_config
@@ -21,7 +21,7 @@ async def main():
     )
     module = Module.from_args()
 
-    module.add_model_from_registry(Vision.SUBTYPE, MotionDetector.MODEL)
+    module.add_model_from_registry(Vision.API, MotionDetector.MODEL)
     await module.start()
 
 
