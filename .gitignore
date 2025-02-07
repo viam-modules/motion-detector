@@ -1,1 +1,6 @@
 __pycache__
+
+# Artifacts created from running `make setup`
+build/
+dist/
+main.spec
