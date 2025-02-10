@@ -1,0 +1,7 @@
+__pycache__
+.venv
+
+# Artifacts created from running `make setup`
+build/
+dist/
+main.spec
