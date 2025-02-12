@@ -91,3 +91,56 @@ class TestMotionDetector:
         assert out.detections is not None
         assert out.detections[0]["class_name"] == "motion"
         assert out.objects is None
+
+
+    @pytest.mark.asyncio
+    async def test_captureall_not_too_large(self):
+        md = self.getMD()
+        md.max_box_size = 1000000000
+        out = await md.capture_all_from_camera("test",return_image=True,
+                                                return_classifications=True,
+                                                return_detections=True,
+                                                return_object_point_clouds=True)
+        assert isinstance(out, CaptureAllResult)
+        print(out)
+        assert out.image is not None
+        assert out.classifications is not None
+        assert len(out.classifications) == 1
+        assert out.classifications[0]["class_name"] == "motion"
+        assert out.detections is not None
+        assert out.detections[0]["class_name"] == "motion"
+        assert out.objects is None
+
+
+    @pytest.mark.asyncio
+    async def test_captureall_too_small(self):
+        md = self.getMD()
+        md.min_box_size = 1000000000
+        out = await md.capture_all_from_camera("test",return_image=True,
+                                                return_classifications=True,
+                                                return_detections=True,
+                                                return_object_point_clouds=True)
+        assert isinstance(out, CaptureAllResult)
+        print(out)
+        assert out.image is not None
+        assert out.classifications is not None
+        assert len(out.classifications) == 1
+        assert out.classifications[0]["class_name"] == "motion"
+        assert out.detections == []
+
+
+    @pytest.mark.asyncio
+    async def test_captureall_too_large(self):
+        md = self.getMD()
+        md.max_box_size = 5
+        out = await md.capture_all_from_camera("test",return_image=True,
+                                                return_classifications=True,
+                                                return_detections=True,
+                                                return_object_point_clouds=True)
+        assert isinstance(out, CaptureAllResult)
+        print(out)
+        assert out.image is not None
+        assert out.classifications is not None
+        assert len(out.classifications) == 1
+        assert out.classifications[0]["class_name"] == "motion"
+        assert out.detections == []
