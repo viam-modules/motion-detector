@@ -282,17 +282,19 @@ class MotionDetector(Vision, Reconfigurable):
             xs = [pt[0][0] for pt in c]
             ys = [pt[0][1] for pt in c]
             xmin, xmax, ymin, ymax = min(xs), max(xs), min(ys), max(ys)
-            # Add to list of detections if big enough
-            if (ymax - ymin) * (xmax - xmin) > self.min_box_size:
-                detections.append(
-                    {
-                        "confidence": 0.5,
-                        "class_name": "motion",
-                        "x_min": int(xmin),
-                        "y_min": int(ymin),
-                        "x_max": int(xmax),
-                        "y_max": int(ymax),
-                    }
-                )
+            # Ignore this detection if it's the wrong size
+            if (ymax - ymin) * (xmax - xmin) < self.min_box_size:
+                continue
+
+            detections.append(
+                {
+                    "confidence": 0.5,
+                    "class_name": "motion",
+                    "x_min": int(xmin),
+                    "y_min": int(ymin),
+                    "x_max": int(xmax),
+                    "y_max": int(ymax),
+                }
+            )
 
         return detections
