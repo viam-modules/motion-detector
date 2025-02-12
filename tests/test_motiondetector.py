@@ -83,7 +83,6 @@ class TestMotionDetector:
                                                 return_detections=True,
                                                 return_object_point_clouds=True)
         assert isinstance(out, CaptureAllResult)
-        print(out)
         assert out.image is not None
         assert out.classifications is not None
         assert len(out.classifications) == 1
@@ -102,7 +101,6 @@ class TestMotionDetector:
                                                 return_detections=True,
                                                 return_object_point_clouds=True)
         assert isinstance(out, CaptureAllResult)
-        print(out)
         assert out.image is not None
         assert out.classifications is not None
         assert len(out.classifications) == 1
@@ -121,7 +119,6 @@ class TestMotionDetector:
                                                 return_detections=True,
                                                 return_object_point_clouds=True)
         assert isinstance(out, CaptureAllResult)
-        print(out)
         assert out.image is not None
         assert out.classifications is not None
         assert len(out.classifications) == 1
@@ -138,7 +135,6 @@ class TestMotionDetector:
                                                 return_detections=True,
                                                 return_object_point_clouds=True)
         assert isinstance(out, CaptureAllResult)
-        print(out)
         assert out.image is not None
         assert out.classifications is not None
         assert len(out.classifications) == 1
