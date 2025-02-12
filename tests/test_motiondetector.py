@@ -25,6 +25,7 @@ class TestMotionDetector:
         md = MotionDetector("test")
         md.sensitivity = 0.9
         md.min_box_size = 1000
+        md.max_box_size = None
         md.cam_name = "test"
         md.camera = FakeCamera("test")
         return md
