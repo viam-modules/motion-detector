@@ -282,8 +282,10 @@ class MotionDetector(Vision, Reconfigurable):
             xs = [pt[0][0] for pt in c]
             ys = [pt[0][1] for pt in c]
             xmin, xmax, ymin, ymax = min(xs), max(xs), min(ys), max(ys)
+
             # Ignore this detection if it's the wrong size
-            if (ymax - ymin) * (xmax - xmin) < self.min_box_size:
+            area = (ymax - ymin) * (xmax - xmin)
+            if area < self.min_box_size:
                 continue
 
             detections.append(
