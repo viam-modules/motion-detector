@@ -287,6 +287,8 @@ class MotionDetector(Vision, Reconfigurable):
             area = (ymax - ymin) * (xmax - xmin)
             if area < self.min_box_size:
                 continue
+            if self.max_box_size is not None and area > self.max_box_size:
+                continue
 
             detections.append(
                 {
