@@ -21,7 +21,8 @@ def make_component_config(dictionary: Mapping[str, Any]) -> ComponentConfig:
 
 class TestMotionDetector:
 
-    def getMD(self):
+    @staticmethod
+    def getMD():
         md = MotionDetector("test")
         md.sensitivity = 0.9
         md.min_box_size = 1000
