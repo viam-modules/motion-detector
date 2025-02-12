@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # setup.sh -- environment bootstrapper for python virtualenv
 
-set -euo pipefail
+# x: print out commands as they are run
+# e: exit on any failure
+# u: using a nonexistent environment variable is an error
+# o pipefail: in a pipeline, any intermediate step exiting with failure counts as an overall fail
+set -xeuo pipefail
 
 SUDO=sudo
 if ! command -v $SUDO; then
