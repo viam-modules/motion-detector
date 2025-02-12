@@ -79,6 +79,9 @@ class MotionDetector(Vision, Reconfigurable):
         if self.sensitivity == 0:
             self.sensitivity = 0.9
         self.min_box_size = config.attributes.fields["min_box_size"].number_value
+        self.max_box_size = config.attributes.fields.get("max_box_size")
+        if self.max_box_size is not None:
+            self.max_box_size = self.max_box_size.number_value
 
     # This will be the main method implemented in this module.
     # Given a camera. Perform frame differencing and return how much of the image is moving
