@@ -57,13 +57,13 @@ class MotionDetector(Vision, Reconfigurable):
     def validate_config(cls, config: ServiceConfig) -> Sequence[str]:
         source_cam = config.attributes.fields["cam_name"].string_value
         if source_cam == "":
-            raise Exception("Source camera must be provided as 'cam_name'")
+            raise ValueError("Source camera must be provided as 'cam_name'")
         min_boxsize = config.attributes.fields["min_box_size"].number_value
         if min_boxsize < 0:
-            raise Exception("Minimum bounding box size should be a positive integer")
+            raise ValueError("Minimum bounding box size should be a positive integer")
         sensitivity = config.attributes.fields["sensitivity"].number_value
         if sensitivity < 0 or sensitivity > 1:
-            raise Exception("Sensitivity should be a number between 0 and 1")
+            raise ValueError("Sensitivity should be a number between 0 and 1")
         return [source_cam]
 
     # Handles attribute reconfiguration
@@ -91,7 +91,7 @@ class MotionDetector(Vision, Reconfigurable):
         # Grab and grayscale 2 images
         input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
         if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception(
+            raise ValueError(
                 "image mime type must be PNG or JPEG, not ", input1.mime_type
             )
         img1 = pil.viam_to_pil_image(input1)
@@ -99,7 +99,7 @@ class MotionDetector(Vision, Reconfigurable):
 
         input2 = await self.camera.get_image()
         if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception(
+            raise ValueError(
                 "image mime type must be PNG or JPEG, not ", input2.mime_type
             )
         img2 = pil.viam_to_pil_image(input2)
@@ -117,7 +117,7 @@ class MotionDetector(Vision, Reconfigurable):
         **kwargs,
     ) -> List[Classification]:
         if camera_name != self.cam_name:
-            raise Exception(
+            raise ValueError(
                 "Camera name passed to method:",
                 camera_name,
                 "is not the configured 'cam_name'",
@@ -138,7 +138,7 @@ class MotionDetector(Vision, Reconfigurable):
         # Grab and grayscale 2 images
         input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
         if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception(
+            raise ValueError(
                 "image mime type must be PNG or JPEG, not ", input1.mime_type
             )
         img1 = pil.viam_to_pil_image(input1)
@@ -146,7 +146,7 @@ class MotionDetector(Vision, Reconfigurable):
 
         input2 = await self.camera.get_image()
         if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
-            raise Exception(
+            raise ValueError(
                 "image mime type must be PNG or JPEG, not ", input2.mime_type
             )
         img2 = pil.viam_to_pil_image(input2)
@@ -163,7 +163,7 @@ class MotionDetector(Vision, Reconfigurable):
         **kwargs,
     ) -> List[Detection]:
         if camera_name != self.cam_name:
-            raise Exception(
+            raise ValueError(
                 "Camera name passed to method:",
                 camera_name,
                 "is not the configured 'cam_name':",
@@ -207,7 +207,7 @@ class MotionDetector(Vision, Reconfigurable):
     ) -> CaptureAllResult:
         result = CaptureAllResult()
         if camera_name not in (self.cam_name, ""):
-            raise Exception(
+            raise ValueError(
                 "Camera name passed to method:",
                 camera_name,
                 "is not the configured 'cam_name':",
