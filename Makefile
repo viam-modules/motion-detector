@@ -1,10 +1,18 @@
+# These targets do not construct files named after the target itself. Rerun them every time.
+.PHONY: setup build test dist/main lint
+
 setup:
 	./build.sh
-	
+
+build: dist/main
+
 test:
 	PYTHONPATH=./src pytest
+
+dist/main:
+	. .venv/bin/activate && python -m PyInstaller --onefile --hidden-import="googleapiclient" --add-data="./src:src" src/main.py
 	
-dist/archive.tar.gz:
+dist/archive.tar.gz: dist/main
 	tar -czvf dist/archive.tar.gz dist/main
 
 lint:

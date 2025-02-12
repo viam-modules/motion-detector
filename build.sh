@@ -36,9 +36,5 @@ echo creating virtualenv at $VIRTUAL_ENV
 python3 -m venv $VIRTUAL_ENV
 echo installing dependencies from requirements.txt
 $VIRTUAL_ENV/bin/pip install -r requirements.txt -U
-source $VIRTUAL_ENV/bin/activate
-$PYTHON -m PyInstaller --onefile --hidden-import="googleapiclient" --add-data="./src:src"  src/main.py
 # When running as a local module, we need meta.json to be in the same directory as the module.
 ln -sf ../meta.json dist
-tar -czvf dist/archive.tar.gz dist/main
-
