@@ -64,6 +64,9 @@ class MotionDetector(Vision, Reconfigurable):
         sensitivity = config.attributes.fields["sensitivity"].number_value
         if sensitivity < 0 or sensitivity > 1:
             raise ValueError("Sensitivity should be a number between 0 and 1")
+        max_box_size = config.attributes.fields.get("max_box_size")
+        if max_box_size is not None and max_box_size.number_value <= 0:
+            raise ValueError("Maximum bounding box size, if present, must be a positive integer")
         return [source_cam]
 
     # Handles attribute reconfiguration
