@@ -12,7 +12,7 @@ fi
 python_version=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
 
 if command -v apt-get; then
-    $SUDO apt-get -y install python3-venv 
+    $SUDO apt-get -y install python3-venv
     if dpkg -l python3-venv; then
         echo "python3-venv is installed, skipping setup"
     else

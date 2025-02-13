@@ -8,14 +8,14 @@ To transform your camera into a motion detecting camera, configure this vision s
 
 Start by [configuring a camera](https://docs.viam.com/components/camera/webcam/) on your robot. Remember the name you give to the camera, it will be important later.
 
-> [!NOTE]  
+> [!NOTE]
 > Before configuring your camera or vision service, you must [create a robot](https://docs.viam.com/manage/fleet/robots/#add-a-new-robot).
 
 ## Configuration
 
 Navigate to the **Config** tab of your robot’s page in [the Viam app](https://app.viam.com/). Click on the **Services** subtab and click **Create service**. Select the `vision` type, then select the `motion-detector` model. Enter a name for your service and click **Create**.
 
-On the new component panel, copy and paste the following attribute template into your base’s **Attributes** box. 
+On the new component panel, copy and paste the following attribute template into your base’s **Attributes** box.
 ```json
 {
   "cam_name": "myCam",
@@ -26,7 +26,7 @@ On the new component panel, copy and paste the following attribute template into
 
 Edit the attributes as applicable.
 
-> [!NOTE]  
+> [!NOTE]
 > For more information, see [Configure a Robot](https://docs.viam.com/manage/configuration/).
 
 ### Attributes
@@ -70,7 +70,7 @@ The following attributes are available for `viam:vision:motion-detector` vision 
 
 ### Usage
 
-This module is made for use with the following methods of the [vision service API](https://docs.viam.com/services/vision/#api): 
+This module is made for use with the following methods of the [vision service API](https://docs.viam.com/services/vision/#api):
 - [`GetClassifications()`](https://docs.viam.com/services/vision/#getclassifications)
 - [`GetClassificationsFromCamera()`](https://docs.viam.com/services/vision/#getclassificationsfromcamera)
 - [`GetDetections()`](https://docs.viam.com/services/vision/#getdetections)
@@ -79,13 +79,13 @@ This module is made for use with the following methods of the [vision service AP
 
 The module behavior differs slightly for classifications and detections.
 
-When returning classifications, the module will always return a single classification with the `class_name` "motion". 
+When returning classifications, the module will always return a single classification with the `class_name` "motion".
 The `confidence` of the classification will be a percentage equal to the percentage of the image that moved (more than a threshold determined by the sensitivity attribute).
 
-When returning detections, the module will return a list of detections with bounding boxes that encapsulate the movement. 
-The `class_name` will be "motion" and the `confidence` will always be 0.5. 
+When returning detections, the module will return a list of detections with bounding boxes that encapsulate the movement.
+The `class_name` will be "motion" and the `confidence` will always be 0.5.
 
-## Visualize 
+## Visualize
 
 Once the `viam:vision:motion-detector` modular service is in use, configure a [transform camera](https://docs.viam.com/components/camera/transform/) to see classifications or detections appear in your robot's field of vision.
 

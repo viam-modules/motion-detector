@@ -18,14 +18,14 @@ class FakeCamera(Camera):
         self.images = [img1, img2]
 
     async def get_image(self, mime_type: str = "") -> Coroutine[Any, Any, ViamImage]:
-        self.count +=1 
+        self.count +=1
         return pil.pil_to_viam_image(self.images[self.count%2], CameraMimeType.JPEG)
-    
+
     async def get_images(self) -> Coroutine[Any, Any, Tuple[List[NamedImage] | ResponseMetadata]]:
         raise NotImplementedError
 
     async def get_properties(self) -> Coroutine[Any, Any, GetPropertiesResponse]:
         raise NotImplementedError
-    
+
     async def get_point_cloud(self) -> Coroutine[Any, Any, Tuple[bytes | str]]:
         raise NotImplementedError

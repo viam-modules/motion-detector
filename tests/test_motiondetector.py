@@ -17,19 +17,33 @@ def make_component_config(dictionary: Mapping[str, Any]) -> ComponentConfig:
         struct.update(dictionary=dictionary)
         return ComponentConfig(attributes=struct)
 
-   
 
 
 class TestMotionDetector:
 
-    def getMD(self):
+    @staticmethod
+    def getMD():
         md = MotionDetector("test")
         md.sensitivity = 0.9
         md.min_box_size = 1000
+        md.max_box_size = None
         md.cam_name = "test"
         md.camera = FakeCamera("test")
         return md
-    
+
+    @staticmethod
+    async def get_output(md):
+        out = await md.capture_all_from_camera("test",return_image=True,
+                                                return_classifications=True,
+                                                return_detections=True,
+                                                return_object_point_clouds=True)
+        assert isinstance(out, CaptureAllResult)
+        assert out.image is not None
+        assert out.classifications is not None
+        assert len(out.classifications) == 1
+        assert out.classifications[0]["class_name"] == "motion"
+        return out
+
 
     def test_validate(self):
         md = self.getMD()
@@ -52,7 +66,7 @@ class TestMotionDetector:
         classifications = md.classification_from_gray_imgs(gray1, gray2)
         assert len(classifications) == 1
         assert classifications[0]["class_name"] == "motion"
-        
+
 
     def test_detections(self):
         img1 = Image.open("tests/img1.jpg")
@@ -74,23 +88,37 @@ class TestMotionDetector:
         assert props.detections_supported == True
         assert props.object_point_clouds_supported == False
 
-    
+
     @pytest.mark.asyncio
     async def test_captureall(self):
         md = self.getMD()
-        out = await md.capture_all_from_camera("test",return_image=True, 
-                                                return_classifications=True,
-                                                return_detections=True,
-                                                return_object_point_clouds=True)
-        assert isinstance(out, CaptureAllResult)
-        print(out)
-        assert out.image is not None 
-        assert out.classifications is not None 
-        assert len(out.classifications) == 1
-        assert out.classifications[0]["class_name"] == "motion"
-        assert out.detections is not None 
+        out = await self.get_output(md)
+        assert out.detections is not None
         assert out.detections[0]["class_name"] == "motion"
-        assert out.objects is None 
+        assert out.objects is None
 
 
+    @pytest.mark.asyncio
+    async def test_captureall_not_too_large(self):
+        md = self.getMD()
+        md.max_box_size = 1000000000
+        out = await self.get_output(md)
+        assert out.detections is not None
+        assert out.detections[0]["class_name"] == "motion"
+        assert out.objects is None
 
+
+    @pytest.mark.asyncio
+    async def test_captureall_too_small(self):
+        md = self.getMD()
+        md.min_box_size = 1000000000
+        out = await self.get_output(md)
+        assert out.detections == []
+
+
+    @pytest.mark.asyncio
+    async def test_captureall_too_large(self):
+        md = self.getMD()
+        md.max_box_size = 5
+        out = await self.get_output(md)
+        assert out.detections == []

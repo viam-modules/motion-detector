@@ -10,10 +10,10 @@
       }
     ],
     "build": {
-      "setup": "make setup", 
+      "setup": "make setup",
       "build": "make dist/archive.tar.gz",
-      "path": "dist/archive.tar.gz", 
-      "arch": ["linux/amd64", "linux/arm64"] 
+      "path": "dist/archive.tar.gz",
+      "arch": ["linux/amd64", "linux/arm64"]
   },
   "entrypoint": "dist/main"
-  }
+}
