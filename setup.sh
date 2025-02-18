@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # setup.sh -- environment bootstrapper for python virtualenv
 
-set -euo pipefail
+# x: print out commands as they are run
+# e: exit on any failure
+# u: using a nonexistent environment variable is an error
+# o pipefail: in a pipeline, any intermediate step exiting with failure counts as an overall fail
+set -xeuo pipefail
 
 SUDO=sudo
 if ! command -v $SUDO; then
@@ -32,9 +36,7 @@ echo creating virtualenv at $VIRTUAL_ENV
 python3 -m venv $VIRTUAL_ENV
 echo installing dependencies from requirements.txt
 $VIRTUAL_ENV/bin/pip install -r requirements.txt -U
-source $VIRTUAL_ENV/bin/activate
-$PYTHON -m PyInstaller --onefile --hidden-import="googleapiclient" --add-data="./src:src"  src/main.py
-# When running as a local module, we need meta.json to be in the same directory as the module.
-ln -sf ../meta.json dist
-tar -czvf dist/archive.tar.gz dist/main
 
+# When running as a local module, we need meta.json to be in the same directory as the module.
+mkdir -p dist
+ln -sf ../meta.json dist

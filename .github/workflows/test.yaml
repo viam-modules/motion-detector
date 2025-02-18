@@ -19,7 +19,7 @@ jobs:
         python --version
         pip install --upgrade pip
         pip --version
-        pip install -r requirements.txt
+        make setup
 
     - name: Run lint
       run: make lint
