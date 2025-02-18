@@ -6,7 +6,7 @@ dist/archive.tar.gz: dist/main
 	tar -czvf dist/archive.tar.gz dist/main
 
 setup:
-	./build.sh
+	./setup.sh
 
 build: dist/main
 
