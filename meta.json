@@ -6,7 +6,9 @@
     "models": [
       {
         "api": "rdk:service:vision",
-        "model": "viam:vision:motion-detector"
+        "model": "viam:vision:motion-detector",
+        "markdown_link": "README.md#example-attributes",
+        "short_description": "A vision service that finds bounding boxes around motion"
       }
     ],
     "build": {
