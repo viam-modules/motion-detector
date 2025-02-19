@@ -68,6 +68,18 @@ The following attributes are available for `viam:vision:motion-detector` vision 
 
 ```
 
+### Example Attributes
+
+You should be able to copy and paste this straight into the setup section, just change the camera name:
+
+```json
+{
+  "cam_name": "myCam",
+  "sensitivity": 0.9,
+  "min_box_size": 2000
+}
+```
+
 ### Usage
 
 This module is made for use with the following methods of the [vision service API](https://docs.viam.com/services/vision/#api):
