@@ -12,24 +12,24 @@ import pytest
 import cv2
 import numpy as np
 
+
 def make_component_config(dictionary: Mapping[str, Any]) -> ComponentConfig:
         struct = Struct()
         struct.update(dictionary=dictionary)
         return ComponentConfig(attributes=struct)
 
 
+def getMD():
+    md = MotionDetector("test")
+    md.sensitivity = 0.9
+    md.min_box_size = 1000
+    md.max_box_size = None
+    md.cam_name = "test"
+    md.camera = FakeCamera("test")
+    return md
+
 
 class TestMotionDetector:
-
-    @staticmethod
-    def getMD():
-        md = MotionDetector("test")
-        md.sensitivity = 0.9
-        md.min_box_size = 1000
-        md.max_box_size = None
-        md.cam_name = "test"
-        md.camera = FakeCamera("test")
-        return md
 
     @staticmethod
     async def get_output(md):
@@ -46,7 +46,7 @@ class TestMotionDetector:
 
 
     def test_validate(self):
-        md = self.getMD()
+        md = getMD()
         empty_config = make_component_config({})
         config = make_component_config({
             "cam_name": "test"
@@ -62,7 +62,7 @@ class TestMotionDetector:
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
 
-        md = self.getMD()
+        md = getMD()
         classifications = md.classification_from_gray_imgs(gray1, gray2)
         assert len(classifications) == 1
         assert classifications[0]["class_name"] == "motion"
@@ -74,7 +74,7 @@ class TestMotionDetector:
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
 
-        md = self.getMD()
+        md = getMD()
         detections = md.detections_from_gray_imgs(gray1, gray2)
         assert len(detections) > 0
         assert detections[0]["class_name"] == "motion"
@@ -82,7 +82,7 @@ class TestMotionDetector:
 
     @pytest.mark.asyncio
     async def test_properties(self):
-        md = self.getMD()
+        md = getMD()
         props = await md.get_properties()
         assert props.classifications_supported == True
         assert props.detections_supported == True
@@ -91,7 +91,7 @@ class TestMotionDetector:
 
     @pytest.mark.asyncio
     async def test_captureall(self):
-        md = self.getMD()
+        md = getMD()
         out = await self.get_output(md)
         assert out.detections is not None
         assert out.detections[0]["class_name"] == "motion"
@@ -100,7 +100,7 @@ class TestMotionDetector:
 
     @pytest.mark.asyncio
     async def test_captureall_not_too_large(self):
-        md = self.getMD()
+        md = getMD()
         md.max_box_size = 1000000000
         out = await self.get_output(md)
         assert out.detections is not None
@@ -110,7 +110,7 @@ class TestMotionDetector:
 
     @pytest.mark.asyncio
     async def test_captureall_too_small(self):
-        md = self.getMD()
+        md = getMD()
         md.min_box_size = 1000000000
         out = await self.get_output(md)
         assert out.detections == []
@@ -118,7 +118,7 @@ class TestMotionDetector:
 
     @pytest.mark.asyncio
     async def test_captureall_too_large(self):
-        md = self.getMD()
+        md = getMD()
         md.max_box_size = 5
         out = await self.get_output(md)
         assert out.detections == []
