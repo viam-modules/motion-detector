@@ -84,11 +84,10 @@ class MotionDetector(Vision, Reconfigurable):
         max_box_size    = config.attributes.fields.get("max_box_size")
         max_box_percent = config.attributes.fields.get("max_box_percent")
         if max_box_size is None:
-            if max_box_percent is None:
-                raise ValueError("Must specify the maximum box in either pixels or percentages")
-            max_box_val = max_box_percent.number_value
-            if max_box_val < 0.0 or max_box_val > 1.0:
-                raise ValueError("Maximum bounding box percent should be between 0.0 and 1.0")
+            if max_box_percent is not None:
+                max_box_val = max_box_percent.number_value
+                if max_box_val < 0.0 or max_box_val > 1.0:
+                    raise ValueError("Maximum bounding box percent should be between 0.0 and 1.0")
         else:  # max_box_size is not None
             if max_box_percent is not None:
                 raise ValueError("Cannot specify the maximum box in both pixels and percentages")
