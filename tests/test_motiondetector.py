@@ -53,7 +53,7 @@ class TestConfigValidation:
         assert response == ["test"]
 
 
-    def test_invalid(self):
+    def test_empty(self):
         md = getMD()
         empty_config = make_component_config({})
         with pytest.raises(ValueError, match="Source camera must be provided as 'cam_name'"):
