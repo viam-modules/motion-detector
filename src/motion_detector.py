@@ -58,9 +58,23 @@ class MotionDetector(Vision, Reconfigurable):
         source_cam = config.attributes.fields["cam_name"].string_value
         if source_cam == "":
             raise ValueError("Source camera must be provided as 'cam_name'")
-        min_boxsize = config.attributes.fields["min_box_size"].number_value
-        if min_boxsize < 0:
-            raise ValueError("Minimum bounding box size should be a positive integer")
+
+        # You must specify either a min_box_size or a min_box_percent.
+        min_box_size    = config.attributes.fields.get("min_box_size")
+        min_box_percent = config.attributes.fields.get("min_box_percent")
+        if min_box_size is None:
+            if min_box_percent is None:
+                raise ValueError("Must specify the minimum box in either pixels or percentages")
+            min_box_val = min_box_percent.number_value
+            if min_box_val < 0.0 or min_box_val > 1.0:
+                raise ValueError("Minimum bounding box percent should be between 0.0 and 1.0")
+        else:  # min_box_size is not None
+            if min_box_percent is not None:
+                raise ValueError("Cannot specify the minimum box in both pixels and percentages")
+            min_box_val = min_box_size.number_value
+            if min_box_val < 0:
+                raise ValueError("Minimum bounding box size should be a non-negative integer")
+
         sensitivity = config.attributes.fields["sensitivity"].number_value
         if sensitivity < 0 or sensitivity > 1:
             raise ValueError("Sensitivity should be a number between 0 and 1")
