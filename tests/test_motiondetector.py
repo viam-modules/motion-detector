@@ -29,8 +29,19 @@ def getMD():
     return md
 
 
-class TestMotionDetector:
+class TestConfigValidation:
+    def test_validate(self):
+        md = getMD()
+        empty_config = make_component_config({})
+        config = make_component_config({
+            "cam_name": "test"
+        })
+        with pytest.raises(Exception):
+            response = md.validate_config(config=empty_config)
+        response = md.validate_config(config=config)
 
+
+class TestMotionDetector:
     @staticmethod
     async def get_output(md):
         out = await md.capture_all_from_camera("test",return_image=True,
@@ -43,17 +54,6 @@ class TestMotionDetector:
         assert len(out.classifications) == 1
         assert out.classifications[0]["class_name"] == "motion"
         return out
-
-
-    def test_validate(self):
-        md = getMD()
-        empty_config = make_component_config({})
-        config = make_component_config({
-            "cam_name": "test"
-        })
-        with pytest.raises(Exception):
-            response = md.validate_config(config=empty_config)
-        response = md.validate_config(config=config)
 
 
     def test_classifications(self):
