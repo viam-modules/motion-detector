@@ -33,15 +33,19 @@ def getMD():
 
 
 class TestConfigValidation:
-    def test_validate(self):
+    def test_valid(self):
         md = getMD()
-        empty_config = make_component_config({})
         config = make_component_config({
             "cam_name": "test"
         })
+        response = md.validate_config(config=config)
+        assert response == ["test"]
+
+    def test_invalid(self):
+        md = getMD()
+        empty_config = make_component_config({})
         with pytest.raises(ValueError, match="Source camera must be provided as 'cam_name'"):
             response = md.validate_config(config=empty_config)
-        response = md.validate_config(config=config)
 
 
 class TestMotionDetector:
