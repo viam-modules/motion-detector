@@ -48,7 +48,7 @@ class TestMotionDetector:
     def test_validate(self):
         md = self.getMD()
         empty_config = make_component_config({})
-        config =make_component_config({
+        config = make_component_config({
             "cam_name": "test"
         })
         with pytest.raises(Exception):
