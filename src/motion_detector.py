@@ -54,7 +54,10 @@ class MotionDetector(Vision, Reconfigurable):
 
     # Validates JSON Configuration
     @classmethod
-    def validate_config(cls, config: ServiceConfig) -> Sequence[str]:
+    def validate_config(  # pylint: disable=too-many-branches
+        cls,
+        config: ServiceConfig
+    ) -> Sequence[str]:
         source_cam = config.attributes.fields["cam_name"].string_value
         if source_cam == "":
             raise ValueError("Source camera must be provided as 'cam_name'")
