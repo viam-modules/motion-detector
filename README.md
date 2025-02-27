@@ -36,7 +36,10 @@ The following attributes are available for `viam:vision:motion-detector` vision 
 | Name | Type | Inclusion | Description |
 | ---- | ---- | --------- | ----------- |
 | `cam_name` | string | **Required** | The name of the camera configured on your robot. |
-| `min_box_size` | int | **Required** | The size (in square pixels) of the smallest bounding box to allow. Relevant for GetDetections/GetDetectionsFromCamera only.
+| `min_box_size` | int | **Optional** | The size (in square pixels) of the smallest bounding box to allow. Relevant for GetDetections/GetDetectionsFromCamera only. You must specify at most one of `min_box_size` and `min_box_percent`.
+| `min_box_percent` | int | **Optional** | The fraction of the image (between 0 and 1) that the smallest bounding box must cover. Relevant for GetDetections/GetDetectionsFromCamera only. You must specify at most one of `min_box_size` and `min_box_percent`.
+| `max_box_size` | int | **Optional** | The size (in square pixels) of the largest bounding box to allow. Relevant for GetDetections/GetDetectionsFromCamera only. You must specify at most one of `max_box_size` and `max_box_percent`.
+| `max_box_percent` | int | **Optional** | The fraction of the image (between 0 and 1) that the largest bounding box can cover. Relevant for GetDetections/GetDetectionsFromCamera only. You must specify at most one of `max_box_size` and `max_box_percent`.
 | `sensitivity` | float | **Optional** | A number from 0 - 1. Larger numbers will make the module more sensitive to motion. Default = 0.9 |
 
 ### Example Configuration
