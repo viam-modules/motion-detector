@@ -33,11 +33,14 @@ def getMD():
 
 
 class TestConfigValidation:
-    def test_valid(self):
+    @parameterized.expand((
+        ("all defaults", {}),
+    ))
+    def test_valid(self, unused_test_name, extra_config_values):
         md = getMD()
-        config = make_component_config({
-            "cam_name": "test"
-        })
+        raw_config = {"cam_name": "test"}
+        raw_config.update(extra_config_values)
+        config = make_component_config(raw_config)
         response = md.validate_config(config=config)
         assert response == ["test"]
 
