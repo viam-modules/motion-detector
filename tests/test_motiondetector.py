@@ -53,6 +53,27 @@ class TestConfigValidation:
         assert response == ["test"]
 
 
+    @parameterized.expand((
+        ({"min_box_size": -1},      "Minimum bounding box size should be a non-negative integer"),
+        ({"min_box_percent": -0.1}, "Minimum bounding box percent should be between 0.0 and 1.0"),
+        ({"min_box_percent": 1.1},  "Minimum bounding box percent should be between 0.0 and 1.0"),
+        ({"max_box_size": -1},      "Maximum bounding box size should be a non-negative integer"),
+        ({"max_box_percent": -0.1}, "Maximum bounding box percent should be between 0.0 and 1.0"),
+        ({"max_box_percent": 1.1},  "Maximum bounding box percent should be between 0.0 and 1.0"),
+        ({"min_box_size": 3, "min_box_percent": 0.1},
+            "Cannot specify the minimum box in both pixels and percentages"),
+        ({"max_box_size": 300, "max_box_percent": 0.9},
+            "Cannot specify the maximum box in both pixels and percentages"),
+    ))
+    def test_invalid(self, extra_config_values, error_message):
+        md = getMD()
+        raw_config = {"cam_name": "test"}
+        raw_config.update(extra_config_values)
+        config = make_component_config(raw_config)
+        with pytest.raises(ValueError, match=error_message):
+            response = md.validate_config(config=config)
+
+
     def test_empty(self):
         md = getMD()
         empty_config = make_component_config({})
