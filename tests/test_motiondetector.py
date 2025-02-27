@@ -34,7 +34,15 @@ def getMD():
 
 class TestConfigValidation:
     @parameterized.expand((
-        ("all defaults", {}),
+        ("all defaults",                     {}),
+        ("min in pixels",                    {"min_box_size": 3}),
+        ("min in percentage",                {"min_box_percent": 0.1}),
+        ("max in pixels",                    {"max_box_size": 300}),
+        ("max in percentage",                {"max_box_percent": 0.9}),
+        ("min and max in pixels",            {"min_box_size": 3, "max_box_size": 300}),
+        ("min in pixels, max in percentage", {"min_box_size": 3, "max_box_percent": 0.9}),
+        ("min and max in percentage",        {"min_box_percent": 0.1, "max_box_percent": 0.9}),
+        ("min in percentage, max in pixels", {"min_box_percent": 0.1, "max_box_size": 300}),
     ))
     def test_valid(self, unused_test_name, extra_config_values):
         md = getMD()
@@ -43,6 +51,7 @@ class TestConfigValidation:
         config = make_component_config(raw_config)
         response = md.validate_config(config=config)
         assert response == ["test"]
+
 
     def test_invalid(self):
         md = getMD()
