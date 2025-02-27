@@ -323,9 +323,14 @@ class MotionDetector(Vision, Reconfigurable):
 
             # Ignore this detection if it's the wrong size
             area = (ymax - ymin) * (xmax - xmin)
-            if area < self.min_box_size:
+            if self.min_box_size is not None and area < self.min_box_size:
                 continue
             if self.max_box_size is not None and area > self.max_box_size:
+                continue
+            area_percent = area / np.prod(diff.shape)
+            if self.min_box_percent is not None and area_percent < self.min_box_percent:
+                continue
+            if self.max_box_percent is not None and area_percent > self.max_box_percent:
                 continue
 
             detections.append(
