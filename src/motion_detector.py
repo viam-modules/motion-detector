@@ -75,9 +75,11 @@ class MotionDetector(Vision, Reconfigurable):
             if min_box_val < 0:
                 raise ValueError("Minimum bounding box size should be a non-negative integer")
 
-        sensitivity = config.attributes.fields["sensitivity"].number_value
-        if sensitivity < 0 or sensitivity > 1:
-            raise ValueError("Sensitivity should be a number between 0 and 1")
+        sensitivity = config.attributes.fields.get("sensitivity")
+        if sensitivity is not None:
+            sensitivity = sensitivity.number_value
+            if sensitivity < 0 or sensitivity > 1:
+                raise ValueError("Sensitivity should be a number between 0 and 1")
 
         max_box_size    = config.attributes.fields.get("max_box_size")
         max_box_percent = config.attributes.fields.get("max_box_percent")
