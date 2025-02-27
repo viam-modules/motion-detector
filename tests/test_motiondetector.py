@@ -8,6 +8,7 @@ from google.protobuf.struct_pb2 import Struct
 from viam.services.vision import CaptureAllResult, Classification, Detection
 from typing import List, Mapping, Any
 
+from parameterized import parameterized
 import pytest
 import cv2
 import numpy as np
@@ -38,7 +39,7 @@ class TestConfigValidation:
         config = make_component_config({
             "cam_name": "test"
         })
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError, match="Source camera must be provided as 'cam_name'"):
             response = md.validate_config(config=empty_config)
         response = md.validate_config(config=config)
 
