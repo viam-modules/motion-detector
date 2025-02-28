@@ -62,7 +62,6 @@ class MotionDetector(Vision, Reconfigurable):
         if source_cam == "":
             raise ValueError("Source camera must be provided as 'cam_name'")
 
-        # You must specify either a min_box_size or a min_box_percent.
         min_box_size    = config.attributes.fields.get("min_box_size")
         min_box_percent = config.attributes.fields.get("min_box_percent")
         if min_box_size is None:
