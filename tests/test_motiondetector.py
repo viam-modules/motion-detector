@@ -24,9 +24,9 @@ def getMD():
     md = MotionDetector("test")
     md.sensitivity = 0.9
     md.min_box_size    = 1000
-    md.min_box_percent = None
-    md.max_box_size    = None
-    md.max_box_percent = None
+    md.min_box_percent = 0
+    md.max_box_size    = 0
+    md.max_box_percent = 0
     md.cam_name = "test"
     md.camera = FakeCamera("test")
     return md
