@@ -54,19 +54,36 @@ class MotionDetector(Vision, Reconfigurable):
 
     # Validates JSON Configuration
     @classmethod
-    def validate_config(cls, config: ServiceConfig) -> Sequence[str]:
+    def validate_config(
+        cls,
+        config: ServiceConfig
+    ) -> Sequence[str]:
         source_cam = config.attributes.fields["cam_name"].string_value
         if source_cam == "":
             raise ValueError("Source camera must be provided as 'cam_name'")
-        min_boxsize = config.attributes.fields["min_box_size"].number_value
-        if min_boxsize < 0:
-            raise ValueError("Minimum bounding box size should be a positive integer")
+
+        min_box_size    = config.attributes.fields["min_box_size"].number_value
+        min_box_percent = config.attributes.fields["min_box_percent"].number_value
+        if min_box_size < 0:
+            raise ValueError("Minimum bounding box size should be a non-negative integer")
+        if min_box_percent < 0.0 or min_box_percent > 1.0:
+            raise ValueError("Minimum bounding box percent should be between 0.0 and 1.0")
+        if min_box_size != 0 and min_box_percent != 0.0:
+            raise ValueError("Cannot specify the minimum box in both pixels and percentages")
+
         sensitivity = config.attributes.fields["sensitivity"].number_value
         if sensitivity < 0 or sensitivity > 1:
-            raise ValueError("Sensitivity should be a number between 0 and 1")
-        max_box_size = config.attributes.fields.get("max_box_size")
-        if max_box_size is not None and max_box_size.number_value <= 0:
-            raise ValueError("Maximum bounding box size, if present, must be a positive integer")
+            raise ValueError("Sensitivity should be a number between 0.0 and 1.0")
+
+        max_box_size    = config.attributes.fields["max_box_size"].number_value
+        max_box_percent = config.attributes.fields["max_box_percent"].number_value
+        if max_box_size < 0:
+            raise ValueError("Maximum bounding box size should be a non-negative integer")
+        if max_box_percent < 0.0 or max_box_percent > 1.0:
+            raise ValueError("Maximum bounding box percent should be between 0.0 and 1.0")
+        if max_box_size != 0 and max_box_percent != 0.0:
+            raise ValueError("Cannot specify the maximum box in both pixels and percentages")
+
         return [source_cam]
 
     # Handles attribute reconfiguration
@@ -78,10 +95,12 @@ class MotionDetector(Vision, Reconfigurable):
         self.sensitivity = config.attributes.fields["sensitivity"].number_value
         if self.sensitivity == 0:
             self.sensitivity = 0.9
+
+        # Store all possible box size constraints
         self.min_box_size = config.attributes.fields["min_box_size"].number_value
-        self.max_box_size = config.attributes.fields.get("max_box_size")
-        if self.max_box_size is not None:
-            self.max_box_size = self.max_box_size.number_value
+        self.min_box_percent = config.attributes.fields["min_box_percent"].number_value
+        self.max_box_size = config.attributes.fields["max_box_size"].number_value
+        self.max_box_percent = config.attributes.fields["max_box_percent"].number_value
 
     # This will be the main method implemented in this module.
     # Given a camera. Perform frame differencing and return how much of the image is moving
@@ -287,7 +306,12 @@ class MotionDetector(Vision, Reconfigurable):
             area = (ymax - ymin) * (xmax - xmin)
             if area < self.min_box_size:
                 continue
-            if self.max_box_size is not None and area > self.max_box_size:
+            if self.max_box_size > 0 and area > self.max_box_size:
+                continue
+            area_percent = area / np.prod(diff.shape)
+            if area_percent < self.min_box_percent:
+                continue
+            if self.max_box_percent > 0 and area_percent > self.max_box_percent:
                 continue
 
             detections.append(
