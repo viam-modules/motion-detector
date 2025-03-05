@@ -40,6 +40,7 @@ class TestConfigValidation:
             response = md.validate_config(config=empty_config)
 
 
+    # For each way to specify a valid min/max size, have a test that checks it's valid.
     @parameterized.expand((
         ("all defaults",                     {}),
         ("min in pixels",                    {"min_box_size": 3}),
@@ -60,6 +61,7 @@ class TestConfigValidation:
         assert response == ["test"]
 
 
+    # For each type of invalid config, test that the expected error is raised.
     @parameterized.expand((
         ("Minimum bounding box size should be a non-negative integer", {"min_box_size": -1}),
         ("Minimum bounding box percent should be between 0.0 and 1.0", {"min_box_percent": -0.1}),
