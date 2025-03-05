@@ -97,18 +97,10 @@ class MotionDetector(Vision, Reconfigurable):
             self.sensitivity = 0.9
 
         # Store all possible box size constraints
-        self.min_box_size = config.attributes.fields.get("min_box_size")
-        if self.min_box_size is not None:
-            self.min_box_size = self.min_box_size.number_value
-        self.min_box_percent = config.attributes.fields.get("min_box_percent")
-        if self.min_box_percent is not None:
-            self.min_box_percent = self.min_box_percent.number_value
-        self.max_box_size = config.attributes.fields.get("max_box_size")
-        if self.max_box_size is not None:
-            self.max_box_size = self.max_box_size.number_value
-        self.max_box_percent = config.attributes.fields.get("max_box_percent")
-        if self.max_box_percent is not None:
-            self.max_box_percent = self.max_box_percent.number_value
+        self.min_box_size = config.attributes.fields["min_box_size"].number_value
+        self.min_box_percent = config.attributes.fields["min_box_percent"].number_value
+        self.max_box_size = config.attributes.fields["max_box_size"].number_value
+        self.max_box_percent = config.attributes.fields["max_box_percent"].number_value
 
     # This will be the main method implemented in this module.
     # Given a camera. Perform frame differencing and return how much of the image is moving
@@ -312,14 +304,14 @@ class MotionDetector(Vision, Reconfigurable):
 
             # Ignore this detection if it's the wrong size
             area = (ymax - ymin) * (xmax - xmin)
-            if self.min_box_size is not None and area < self.min_box_size:
+            if area < self.min_box_size:
                 continue
-            if self.max_box_size is not None and area > self.max_box_size:
+            if self.max_box_size > 0 and area > self.max_box_size:
                 continue
             area_percent = area / np.prod(diff.shape)
-            if self.min_box_percent is not None and area_percent < self.min_box_percent:
+            if area_percent < self.min_box_percent:
                 continue
-            if self.max_box_percent is not None and area_percent > self.max_box_percent:
+            if self.max_box_percent > 0 and area_percent > self.max_box_percent:
                 continue
 
             detections.append(
