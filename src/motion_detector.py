@@ -71,11 +71,9 @@ class MotionDetector(Vision, Reconfigurable):
         if min_box_size != 0 and min_box_percent != 0.0:
             raise ValueError("Cannot specify the minimum box in both pixels and percentages")
 
-        sensitivity = config.attributes.fields.get("sensitivity")
-        if sensitivity is not None:
-            sensitivity = sensitivity.number_value
-            if sensitivity < 0 or sensitivity > 1:
-                raise ValueError("Sensitivity should be a number between 0.0 and 1.0")
+        sensitivity = config.attributes.fields["sensitivity"].number_value
+        if sensitivity < 0 or sensitivity > 1:
+            raise ValueError("Sensitivity should be a number between 0.0 and 1.0")
 
         max_box_size    = config.attributes.fields["max_box_size"].number_value
         max_box_percent = config.attributes.fields["max_box_percent"].number_value
