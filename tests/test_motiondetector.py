@@ -33,6 +33,13 @@ def getMD():
 
 
 class TestConfigValidation:
+    def test_empty(self):
+        md = getMD()
+        empty_config = make_component_config({})
+        with pytest.raises(ValueError, match="Source camera must be provided as 'cam_name'"):
+            response = md.validate_config(config=empty_config)
+
+
     @parameterized.expand((
         ("all defaults",                     {}),
         ("min in pixels",                    {"min_box_size": 3}),
@@ -72,13 +79,6 @@ class TestConfigValidation:
         config = make_component_config(raw_config)
         with pytest.raises(ValueError, match=error_message):
             response = md.validate_config(config=config)
-
-
-    def test_empty(self):
-        md = getMD()
-        empty_config = make_component_config({})
-        with pytest.raises(ValueError, match="Source camera must be provided as 'cam_name'"):
-            response = md.validate_config(config=empty_config)
 
 
 class TestMotionDetector:
