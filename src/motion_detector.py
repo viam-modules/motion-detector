@@ -54,7 +54,7 @@ class MotionDetector(Vision, Reconfigurable):
 
     # Validates JSON Configuration
     @classmethod
-    def validate_config(  # pylint: disable=too-many-branches
+    def validate_config(
         cls,
         config: ServiceConfig
     ) -> Sequence[str]:
