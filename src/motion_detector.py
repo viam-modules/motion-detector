@@ -69,7 +69,7 @@ class MotionDetector(Vision, Reconfigurable):
         if min_box_percent < 0.0 or min_box_percent > 1.0:
             raise ValueError("Minimum bounding box percent should be between 0.0 and 1.0")
         if min_box_size != 0 and min_box_percent != 0.0:
-                raise ValueError("Cannot specify the minimum box in both pixels and percentages")
+            raise ValueError("Cannot specify the minimum box in both pixels and percentages")
 
         sensitivity = config.attributes.fields.get("sensitivity")
         if sensitivity is not None:
@@ -77,19 +77,14 @@ class MotionDetector(Vision, Reconfigurable):
             if sensitivity < 0 or sensitivity > 1:
                 raise ValueError("Sensitivity should be a number between 0.0 and 1.0")
 
-        max_box_size    = config.attributes.fields.get("max_box_size")
-        max_box_percent = config.attributes.fields.get("max_box_percent")
-        if max_box_size is None:
-            if max_box_percent is not None:
-                max_box_val = max_box_percent.number_value
-                if max_box_val < 0.0 or max_box_val > 1.0:
-                    raise ValueError("Maximum bounding box percent should be between 0.0 and 1.0")
-        else:  # max_box_size is not None
-            if max_box_percent is not None:
-                raise ValueError("Cannot specify the maximum box in both pixels and percentages")
-            max_box_val = max_box_size.number_value
-            if max_box_val < 0:
-                raise ValueError("Maximum bounding box size should be a non-negative integer")
+        max_box_size    = config.attributes.fields["max_box_size"].number_value
+        max_box_percent = config.attributes.fields["max_box_percent"].number_value
+        if max_box_size < 0:
+            raise ValueError("Maximum bounding box size should be a non-negative integer")
+        if max_box_percent < 0.0 or max_box_percent > 1.0:
+            raise ValueError("Maximum bounding box percent should be between 0.0 and 1.0")
+        if max_box_size != 0 and max_box_percent != 0.0:
+            raise ValueError("Cannot specify the maximum box in both pixels and percentages")
 
         return [source_cam]
 
