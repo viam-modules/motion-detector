@@ -11,6 +11,9 @@ Start by [configuring a camera](https://docs.viam.com/components/camera/webcam/)
 > [!NOTE]
 > Before configuring your camera or vision service, you must [create a robot](https://docs.viam.com/manage/fleet/robots/#add-a-new-robot).
 
+> [!NOTE]
+> If you run this on a non-Debian-based flavor of Linux, you need to ensure that libGL.so.1 is installed on your system! It's probably already installed, unless you're using a headless setup. Ubuntu is Debian-based, so this note doesn't apply on Ubuntu.
+
 ## Configuration
 
 Navigate to the **Config** tab of your robot’s page in [the Viam app](https://app.viam.com/). Click on the **Services** subtab and click **Create service**. Select the `vision` type, then select the `motion-detector` model. Enter a name for your service and click **Create**.

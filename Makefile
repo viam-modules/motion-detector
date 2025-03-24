@@ -3,7 +3,7 @@
 
 # This first target is the one that runs by default.
 dist/archive.tar.gz: dist/main
-	tar -czvf dist/archive.tar.gz dist/main
+	tar -czvf dist/archive.tar.gz dist/main first_run.sh
 
 setup:
 	./setup.sh
