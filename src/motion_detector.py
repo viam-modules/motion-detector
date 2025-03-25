@@ -141,7 +141,9 @@ class MotionDetector(Vision, Reconfigurable):
         timeout: Optional[float] = None,
         **kwargs,
     ) -> List[Classification]:
-        if camera_name != self.cam_name:
+        if camera_name == "":
+            camera_name = self.cam_name
+        elif camera_name != self.cam_name:
             raise ValueError(
                 "Camera name passed to method:",
                 camera_name,
@@ -187,7 +189,9 @@ class MotionDetector(Vision, Reconfigurable):
         timeout: Optional[float] = None,
         **kwargs,
     ) -> List[Detection]:
-        if camera_name != self.cam_name:
+        if camera_name == "":
+            camera_name = self.cam_name
+        elif camera_name != self.cam_name:
             raise ValueError(
                 "Camera name passed to method:",
                 camera_name,
