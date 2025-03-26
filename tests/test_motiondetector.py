@@ -37,7 +37,7 @@ class TestConfigValidation:
         md = getMD()
         empty_config = make_component_config({})
         with pytest.raises(ValueError, match=pytest.source_camera_name_none_defined_error_message):
-            response = md.validate_config(config=empty_config)
+            md.validate_config(config=empty_config)
 
 
     # For each way to specify a valid min/max size, have a test that checks it's valid.
@@ -80,14 +80,14 @@ class TestConfigValidation:
         raw_config.update(extra_config_values)
         config = make_component_config(raw_config)
         with pytest.raises(ValueError, match=error_message):
-            response = md.validate_config(config=config)
+            md.validate_config(config=config)
 
     def test_empty_config_name(self):
         md = getMD()
         raw_config = {"cam_name": ""}
         config = make_component_config(raw_config)
         with pytest.raises(ValueError, match=pytest.source_camera_name_none_defined_error_message):
-            response = md.validate_config(config=config)
+            md.validate_config(config=config)
 
     # For each way to specify a valid camera name, test that the return is valid.
     @parameterized.expand((
@@ -110,7 +110,7 @@ class TestConfigValidation:
         md = getMD()
         config = make_component_config(cam_config)
         with pytest.raises(ValueError, match=error_message):
-            response = md.validate_config(config=config)
+            md.validate_config(config=config)
 
 class TestMotionDetector:
     @staticmethod
