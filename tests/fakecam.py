@@ -1,4 +1,4 @@
-from typing import Any, Coroutine, Final, List, Optional, Tuple, Dict
+from typing import Any, Coroutine, List, Tuple
 from viam.components.camera import Camera
 from viam.gen.component.camera.v1.camera_pb2 import GetPropertiesResponse
 from viam.media.video import NamedImage, ViamImage, CameraMimeType

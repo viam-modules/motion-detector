@@ -1,12 +1,10 @@
 from src.motion_detector import MotionDetector
 from tests.fakecam import FakeCamera
 from PIL import Image
-from unittest.mock import MagicMock, patch
-from viam.components.camera import Camera
 from viam.proto.app.robot import ComponentConfig
 from google.protobuf.struct_pb2 import Struct
-from viam.services.vision import CaptureAllResult, Classification, Detection
-from typing import List, Mapping, Any
+from viam.services.vision import CaptureAllResult
+from typing import Mapping, Any
 
 from parameterized import parameterized
 import pytest
