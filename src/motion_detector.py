@@ -292,8 +292,35 @@ class MotionDetector(Vision, Reconfigurable):
         classifications = [{"class_name": "motion", "confidence": conf}]
         return classifications
 
+    def _format_detection(self, contour, total_pixel_count) -> Optional[Dict[str, Any]]:
+        # Each contour should be a box.
+        xs = [pt[0][0] for pt in contour]
+        ys = [pt[0][1] for pt in contour]
+        xmin, xmax, ymin, ymax = min(xs), max(xs), min(ys), max(ys)
+
+        # Ignore this detection if it's the wrong size
+        area = (ymax - ymin) * (xmax - xmin)
+        if area < self.min_box_size:
+            return None
+        if self.max_box_size > 0 and area > self.max_box_size:
+            return None
+        area_percent = area / total_pixel_count
+        if area_percent < self.min_box_percent:
+            return None
+        if self.max_box_percent > 0 and area_percent > self.max_box_percent:
+            return None
+
+        return {
+            "confidence": 0.5,
+            "class_name": "motion",
+            "x_min": int(xmin),
+            "y_min": int(ymin),
+            "x_max": int(xmax),
+            "y_max": int(ymax),
+        }
+
+
     def detections_from_gray_imgs(self, gray1, gray2):
-        detections = []
         # Frame difference
         diff = cv2.absdiff(gray2, gray1)
 
@@ -314,33 +341,10 @@ class MotionDetector(Vision, Reconfigurable):
         contours, _ = cv2.findContours(img_out, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
         # Make boxes from the contours
+        detections = []
         for c in contours:
-            # Each contour should be a box.
-            xs = [pt[0][0] for pt in c]
-            ys = [pt[0][1] for pt in c]
-            xmin, xmax, ymin, ymax = min(xs), max(xs), min(ys), max(ys)
-
-            # Ignore this detection if it's the wrong size
-            area = (ymax - ymin) * (xmax - xmin)
-            if area < self.min_box_size:
-                continue
-            if self.max_box_size > 0 and area > self.max_box_size:
-                continue
-            area_percent = area / np.prod(diff.shape)
-            if area_percent < self.min_box_percent:
-                continue
-            if self.max_box_percent > 0 and area_percent > self.max_box_percent:
-                continue
-
-            detections.append(
-                {
-                    "confidence": 0.5,
-                    "class_name": "motion",
-                    "x_min": int(xmin),
-                    "y_min": int(ymin),
-                    "x_max": int(xmax),
-                    "y_max": int(ymax),
-                }
-            )
+            detection = self._format_detection(c, np.prod(diff.shape))
+            if detection is not None:
+                detections.append(detection)
 
         return detections
