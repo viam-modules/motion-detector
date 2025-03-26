@@ -13,6 +13,8 @@ import pytest
 import cv2
 import numpy as np
 
+pytest.source_camera_name_none_defined_error_message = "Source camera must be provided as 'cam_name' or 'camera_name', but neither was provided"
+pytest.source_camera_name_both_defined_error_message = "Source camera must be provided as 'cam_name' or 'camera_name', but both were provided"
 
 def make_component_config(dictionary: Mapping[str, Any]) -> ComponentConfig:
         struct = Struct()
@@ -36,7 +38,7 @@ class TestConfigValidation:
     def test_empty(self):
         md = getMD()
         empty_config = make_component_config({})
-        with pytest.raises(ValueError, match="Source camera must be provided as 'cam_name'"):
+        with pytest.raises(ValueError, match=pytest.source_camera_name_none_defined_error_message):
             response = md.validate_config(config=empty_config)
 
 
@@ -86,7 +88,30 @@ class TestConfigValidation:
         md = getMD()
         raw_config = {"cam_name": ""}
         config = make_component_config(raw_config)
-        with pytest.raises(ValueError, match="Source camera must be provided as 'cam_name'"):
+        with pytest.raises(ValueError, match=pytest.source_camera_name_none_defined_error_message):
+            response = md.validate_config(config=config)
+
+    # For each way to specify a valid camera name, test that the return is valid.
+    @parameterized.expand((
+        ("cam_name defined, camera_name not defined",  {"cam_name": "test"}),
+        ("camera_name defined, cam_name not defined",  {"camera_name": "test"}),
+    ))
+    def test_valid_camera_names(self, unused_test_name, cam_config):
+        md = getMD()
+        config = make_component_config(cam_config)
+        response = md.validate_config(config=config)
+        assert response == ["test"]
+
+    # For each way to spedify an invalid camera name, test that the expected error is raised.
+    @parameterized.expand((
+        ("cam_name not defined, camera_name not defined", {}, pytest.source_camera_name_none_defined_error_message),
+        ("cam_name defined, camera_name defined", {"camera_name": "test", "cam_name": "test"}, pytest.source_camera_name_both_defined_error_message),
+        ("cam_name empty, camera_name empty", {"cam_name": "", "camera_name": ""}, pytest.source_camera_name_none_defined_error_message),
+    ))
+    def test_invalid_camera_names(self, unused_test_name, cam_config, error_message):
+        md = getMD()
+        config = make_component_config(cam_config)
+        with pytest.raises(ValueError, match=error_message):
             response = md.validate_config(config=config)
 
 class TestMotionDetector:

@@ -58,9 +58,18 @@ class MotionDetector(Vision, Reconfigurable):
         cls,
         config: ServiceConfig
     ) -> Sequence[str]:
-        source_cam = config.attributes.fields["cam_name"].string_value
-        if source_cam == "":
-            raise ValueError("Source camera must be provided as 'cam_name'")
+        validate_cam_name = config.attributes.fields["cam_name"].string_value
+        validate_camera_name = config.attributes.fields["camera_name"].string_value
+
+        if validate_cam_name == "" and validate_camera_name == "":
+            raise ValueError(
+                "Source camera must be provided as 'cam_name' or 'camera_name', "
+                "but neither was provided")
+        if validate_cam_name != "" and validate_camera_name != "":
+            raise ValueError(
+                "Source camera must be provided as 'cam_name' or 'camera_name', "
+                "but both were provided")
+        source_cam = validate_cam_name if validate_cam_name != "" else validate_camera_name
 
         min_box_size    = config.attributes.fields["min_box_size"].number_value
         min_box_percent = config.attributes.fields["min_box_percent"].number_value
@@ -90,7 +99,11 @@ class MotionDetector(Vision, Reconfigurable):
     def reconfigure(
         self, config: ServiceConfig, dependencies: Mapping[ResourceName, ResourceBase]
     ):
+        # either "camera_name" or "cam_name" is used to specify the camera
         self.cam_name = config.attributes.fields["cam_name"].string_value
+        if self.cam_name == "":
+            self.cam_name = config.attributes.fields["camera_name"].string_value
+
         self.camera = dependencies[Camera.get_resource_name(self.cam_name)]
         self.sensitivity = config.attributes.fields["sensitivity"].number_value
         if self.sensitivity == 0:
