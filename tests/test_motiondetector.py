@@ -155,9 +155,9 @@ class TestMotionDetector:
     async def test_properties(self):
         md = getMD()
         props = await md.get_properties()
-        assert props.classifications_supported == True
-        assert props.detections_supported == True
-        assert props.object_point_clouds_supported == False
+        assert props.classifications_supported
+        assert props.detections_supported
+        assert not props.object_point_clouds_supported
 
 
     @pytest.mark.asyncio
