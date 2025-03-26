@@ -17,5 +17,5 @@ dist/main:
 	. .venv/bin/activate && python -m PyInstaller --onefile --hidden-import="googleapiclient" --add-data="./src:src" src/main.py
 
 lint:
-	. .venv/bin/activate && pylint --disable=C0114,E0401,E1101,C0116,W0613,R0913,C0116,R0914,C0103,W0201,W0719 src/
+	. .venv/bin/activate && pylint --disable=C0114,E1101,C0116,W0613,R0913,C0116,R0914,C0103,W0201,W0719 src/
 
