@@ -106,6 +106,7 @@ class TestConfigValidation:
     @parameterized.expand((
         ("cam_name not defined, camera_name not defined", {}, pytest.source_camera_name_none_defined_error_message),
         ("cam_name defined, camera_name defined", {"camera_name": "test", "cam_name": "test"}, pytest.source_camera_name_both_defined_error_message),
+        ("cam_name empty, camera_name empty", {"cam_name": "", "camera_name": ""}, pytest.source_camera_name_none_defined_error_message),
     ))
     def test_invalid_camera_names(self, unused_test_name, cam_config, error_message):
         md = getMD()
