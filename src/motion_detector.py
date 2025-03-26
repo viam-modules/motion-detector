@@ -236,7 +236,8 @@ class MotionDetector(Vision, Reconfigurable):
         )
 
     # The linter doesn't like the vision service API, which we can't change.
-    async def capture_all_from_camera(  # pylint: disable=too-many-positional-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    async def capture_all_from_camera(
         self,
         camera_name: str,
         return_image: bool = False,
