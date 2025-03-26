@@ -124,7 +124,7 @@ class MotionDetector(Vision, Reconfigurable):
         *,
         extra: Optional[Dict[str, Any]] = None,
         timeout: Optional[float] = None,
-        **kwargs,
+        **kwargs,  # pylint: disable=unused-argument
     ) -> List[Classification]:
         # Grab and grayscale 2 images
         input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
@@ -152,7 +152,7 @@ class MotionDetector(Vision, Reconfigurable):
         *,
         extra: Optional[Dict[str, Any]] = None,
         timeout: Optional[float] = None,
-        **kwargs,
+        **kwargs,  # pylint: disable=unused-argument
     ) -> List[Classification]:
         if camera_name == "":
             camera_name = self.cam_name
@@ -173,7 +173,7 @@ class MotionDetector(Vision, Reconfigurable):
         *,
         extra: Optional[Dict[str, Any]] = None,
         timeout: Optional[float] = None,
-        **kwargs,
+        **kwargs,  # pylint: disable=unused-argument
     ) -> List[Detection]:
         # Grab and grayscale 2 images
         input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
@@ -200,7 +200,7 @@ class MotionDetector(Vision, Reconfigurable):
         *,
         extra: Optional[Dict[str, Any]] = None,
         timeout: Optional[float] = None,
-        **kwargs,
+        **kwargs,  # pylint: disable=unused-argument
     ) -> List[Detection]:
         if camera_name == "":
             camera_name = self.cam_name
