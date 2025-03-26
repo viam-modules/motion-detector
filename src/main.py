@@ -3,7 +3,8 @@ import asyncio
 from viam.services.vision import Vision
 from viam.module.module import Module
 from viam.resource.registry import Registry, ResourceCreatorRegistration
-from src.motion_detector import MotionDetector
+
+from motion_detector import MotionDetector
 
 
 async def main():
