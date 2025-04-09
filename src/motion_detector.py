@@ -339,6 +339,10 @@ class MotionDetector(Vision, Reconfigurable):
                     "y_min": int(ymin),
                     "x_max": int(xmax),
                     "y_max": int(ymax),
+                    "x_min_normalized": xmin / diff.shape[1],
+                    "y_min_normalized": ymin / diff.shape[0],
+                    "x_max_normalized": xmax / diff.shape[1],
+                    "y_max_normalized": ymax / diff.shape[0],
                 }
             )
 
