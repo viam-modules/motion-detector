@@ -296,6 +296,10 @@ class MotionDetector(Vision, Reconfigurable):
         # Frame difference
         diff = cv2.absdiff(gray2, gray1)
 
+        include_normalized = True
+        if diff.shape[0] == 0 or diff.shape[1] == 0:
+            include_normalized = False
+
         # Simple noise filtering via threshold (~10% of 255)
         k = math.floor((1 - self.sensitivity) * 255)
         diff[diff < k] = 0
@@ -331,15 +335,25 @@ class MotionDetector(Vision, Reconfigurable):
             if self.max_box_percent > 0 and area_percent > self.max_box_percent:
                 continue
 
-            detections.append(
-                {
-                    "confidence": 0.5,
-                    "class_name": "motion",
-                    "x_min": int(xmin),
-                    "y_min": int(ymin),
-                    "x_max": int(xmax),
-                    "y_max": int(ymax),
-                }
-            )
+            detection = {
+                "confidence": 0.5,
+                "class_name": "motion",
+                "x_min": xmin,
+                "y_min": ymin,
+                "x_max": xmax,
+                "y_max": ymax,
+            }
+
+            if include_normalized:
+                detection.update(
+                    {
+                        "x_min_normalized": xmin / diff.shape[1],
+                        "y_min_normalized": ymin / diff.shape[0],
+                        "x_max_normalized": xmax / diff.shape[1],
+                        "y_max_normalized": ymax / diff.shape[0],
+                    }
+                )
+
+            detections.append(detection)
 
         return detections

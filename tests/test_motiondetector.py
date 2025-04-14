@@ -151,6 +151,10 @@ class TestMotionDetector:
         detections = md.detections_from_gray_imgs(gray1, gray2)
         assert len(detections) > 0
         assert detections[0]["class_name"] == "motion"
+        assert "x_min_normalized" in detections[0]
+        assert "y_min_normalized" in detections[0]
+        assert "x_max_normalized" in detections[0]
+        assert "y_max_normalized" in detections[0]
 
 
     @pytest.mark.asyncio
