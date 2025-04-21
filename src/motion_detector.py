@@ -1,25 +1,22 @@
 import math
-from typing import ClassVar, List, Mapping, Sequence, Any, Dict, Optional
-from typing_extensions import Self
+from typing import Any, ClassVar, Dict, List, Mapping, Optional, Sequence
+
 import cv2
 import numpy as np
-
-
+import PIL
+from typing_extensions import Self
 from viam.components.camera import Camera
-from viam.media.video import ViamImage, CameraMimeType
+from viam.logging import getLogger
 from viam.media.utils import pil
-from viam.proto.service.vision import Classification, Detection
-from viam.services.vision import Vision, CaptureAllResult
+from viam.media.video import CameraMimeType, ViamImage
 from viam.module.types import Reconfigurable
 from viam.proto.app.robot import ServiceConfig
 from viam.proto.common import PointCloudObject, ResourceName
+from viam.proto.service.vision import Classification, Detection
 from viam.resource.base import ResourceBase
 from viam.resource.types import Model, ModelFamily
+from viam.services.vision import CaptureAllResult, Vision
 from viam.utils import ValueTypes
-from viam.logging import getLogger
-
-
-
 
 LOGGER = getLogger("MotionDetectorLogger")
 
@@ -54,44 +51,57 @@ class MotionDetector(Vision, Reconfigurable):
 
     # Validates JSON Configuration
     @classmethod
-    def validate_config(
-        cls,
-        config: ServiceConfig
-    ) -> Sequence[str]:
+    def validate_config(cls, config: ServiceConfig) -> Sequence[str]:
         validate_cam_name = config.attributes.fields["cam_name"].string_value
         validate_camera_name = config.attributes.fields["camera_name"].string_value
 
         if validate_cam_name == "" and validate_camera_name == "":
             raise ValueError(
                 "Source camera must be provided as 'cam_name' or 'camera_name', "
-                "but neither was provided")
+                "but neither was provided"
+            )
         if validate_cam_name != "" and validate_camera_name != "":
             raise ValueError(
                 "Source camera must be provided as 'cam_name' or 'camera_name', "
-                "but both were provided")
-        source_cam = validate_cam_name if validate_cam_name != "" else validate_camera_name
+                "but both were provided"
+            )
+        source_cam = (
+            validate_cam_name if validate_cam_name != "" else validate_camera_name
+        )
 
-        min_box_size    = config.attributes.fields["min_box_size"].number_value
+        min_box_size = config.attributes.fields["min_box_size"].number_value
         min_box_percent = config.attributes.fields["min_box_percent"].number_value
         if min_box_size < 0:
-            raise ValueError("Minimum bounding box size should be a non-negative integer")
+            raise ValueError(
+                "Minimum bounding box size should be a non-negative integer"
+            )
         if min_box_percent < 0.0 or min_box_percent > 1.0:
-            raise ValueError("Minimum bounding box percent should be between 0.0 and 1.0")
+            raise ValueError(
+                "Minimum bounding box percent should be between 0.0 and 1.0"
+            )
         if min_box_size != 0 and min_box_percent != 0.0:
-            raise ValueError("Cannot specify the minimum box in both pixels and percentages")
+            raise ValueError(
+                "Cannot specify the minimum box in both pixels and percentages"
+            )
 
         sensitivity = config.attributes.fields["sensitivity"].number_value
         if sensitivity < 0 or sensitivity > 1:
             raise ValueError("Sensitivity should be a number between 0.0 and 1.0")
 
-        max_box_size    = config.attributes.fields["max_box_size"].number_value
+        max_box_size = config.attributes.fields["max_box_size"].number_value
         max_box_percent = config.attributes.fields["max_box_percent"].number_value
         if max_box_size < 0:
-            raise ValueError("Maximum bounding box size should be a non-negative integer")
+            raise ValueError(
+                "Maximum bounding box size should be a non-negative integer"
+            )
         if max_box_percent < 0.0 or max_box_percent > 1.0:
-            raise ValueError("Maximum bounding box percent should be between 0.0 and 1.0")
+            raise ValueError(
+                "Maximum bounding box percent should be between 0.0 and 1.0"
+            )
         if max_box_size != 0 and max_box_percent != 0.0:
-            raise ValueError("Cannot specify the maximum box in both pixels and percentages")
+            raise ValueError(
+                "Cannot specify the maximum box in both pixels and percentages"
+            )
 
         return [source_cam]
 
@@ -115,6 +125,14 @@ class MotionDetector(Vision, Reconfigurable):
         self.max_box_size = config.attributes.fields["max_box_size"].number_value
         self.max_box_percent = config.attributes.fields["max_box_percent"].number_value
 
+        # Crop region is optional, so we need to check if it exists
+        if config.attributes.fields["crop_region"].struct_value:
+            self.crop_region = dict(
+                config.attributes.fields["crop_region"].struct_value.fields
+            )
+        else:
+            self.crop_region = None
+
     # This will be the main method implemented in this module.
     # Given a camera. Perform frame differencing and return how much of the image is moving
     async def get_classifications(
@@ -133,6 +151,7 @@ class MotionDetector(Vision, Reconfigurable):
                 "image mime type must be PNG or JPEG, not ", input1.mime_type
             )
         img1 = pil.viam_to_pil_image(input1)
+        img1, _, _ = self.crop_image(img1)
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
         input2 = await self.camera.get_image()
@@ -141,6 +160,7 @@ class MotionDetector(Vision, Reconfigurable):
                 "image mime type must be PNG or JPEG, not ", input2.mime_type
             )
         img2 = pil.viam_to_pil_image(input2)
+        img2, _, _ = self.crop_image(img2)
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
 
         return self.classification_from_gray_imgs(gray1=gray1, gray2=gray2)
@@ -163,8 +183,7 @@ class MotionDetector(Vision, Reconfigurable):
                 "is not the configured 'cam_name'",
                 self.cam_name,
             )
-        image = await self.camera.get_image()
-        return await self.get_classifications(image=image, count=count)
+        return await self.get_classifications(image=None, count=count)
 
     # Not implemented for now. Eventually want this to return the location of the movement
     async def get_detections(
@@ -191,7 +210,6 @@ class MotionDetector(Vision, Reconfigurable):
             )
         img2 = pil.viam_to_pil_image(input2)
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
-
         return self.detections_from_gray_imgs(gray1, gray2)
 
     async def get_detections_from_camera(
@@ -314,7 +332,9 @@ class MotionDetector(Vision, Reconfigurable):
         img_out = cv2.erode(img3, kernel2)
 
         # List points around the remaining blobs
-        contours, _ = cv2.findContours(img_out, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        contours, _ = cv2.findContours(
+            img_out, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE
+        )
 
         # Make boxes from the contours
         for c in contours:
@@ -357,3 +377,17 @@ class MotionDetector(Vision, Reconfigurable):
             detections.append(detection)
 
         return detections
+
+    def crop_image(self, image: PIL.Image.Image):
+        if not self.crop_region:
+            return image
+        else:
+            width, height = image.size
+            x1 = int(self.crop_region["x1_rel"] * width)
+            y1 = int(self.crop_region["y1_rel"] * height)
+            x2 = int(self.crop_region["x2_rel"] * width)
+            y2 = int(self.crop_region["y2_rel"] * height)
+            return image.crop((x1, y1, x2, y2)), width, height
+
+    def retrieve_original_coordinates(self, x_normalized, y_normalized, width, height):
+        pass
