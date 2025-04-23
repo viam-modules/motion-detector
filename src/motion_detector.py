@@ -315,7 +315,7 @@ class MotionDetector(Vision, Reconfigurable):
         classifications = [{"class_name": "motion", "confidence": conf}]
         return classifications
 
-    def detections_from_gray_imgs(self, gray1, gray2, width, height):
+    def detections_from_gray_imgs(self, gray1, gray2, width=None, height=None):
         detections = []
         # Frame difference
         diff = cv2.absdiff(gray2, gray1)
