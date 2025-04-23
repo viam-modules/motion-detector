@@ -130,6 +130,10 @@ class MotionDetector(Vision, Reconfigurable):
             self.crop_region = dict(
                 config.attributes.fields["crop_region"].struct_value.fields
             )
+            self.crop_region["x1_rel"] = float(self.crop_region["x1_rel"].number_value)
+            self.crop_region["y1_rel"] = float(self.crop_region["y1_rel"].number_value)
+            self.crop_region["x2_rel"] = float(self.crop_region["x2_rel"].number_value)
+            self.crop_region["y2_rel"] = float(self.crop_region["y2_rel"].number_value)
         else:
             self.crop_region = None
 
@@ -201,6 +205,7 @@ class MotionDetector(Vision, Reconfigurable):
                 "image mime type must be PNG or JPEG, not ", input1.mime_type
             )
         img1 = pil.viam_to_pil_image(input1)
+        img1, width, height = self.crop_image(img1)
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
         input2 = await self.camera.get_image()
@@ -209,8 +214,9 @@ class MotionDetector(Vision, Reconfigurable):
                 "image mime type must be PNG or JPEG, not ", input2.mime_type
             )
         img2 = pil.viam_to_pil_image(input2)
+        img2, width, height = self.crop_image(img2)
         gray2 = cv2.cvtColor(np.array(img2), cv2.COLOR_BGR2GRAY)
-        return self.detections_from_gray_imgs(gray1, gray2)
+        return self.detections_from_gray_imgs(gray1, gray2, width, height)
 
     async def get_detections_from_camera(
         self,
@@ -309,7 +315,7 @@ class MotionDetector(Vision, Reconfigurable):
         classifications = [{"class_name": "motion", "confidence": conf}]
         return classifications
 
-    def detections_from_gray_imgs(self, gray1, gray2):
+    def detections_from_gray_imgs(self, gray1, gray2, width, height):
         detections = []
         # Frame difference
         diff = cv2.absdiff(gray2, gray1)
@@ -355,6 +361,17 @@ class MotionDetector(Vision, Reconfigurable):
             if self.max_box_percent > 0 and area_percent > self.max_box_percent:
                 continue
 
+            if self.crop_region:
+                # Adjust coordinates based on crop region
+                x_offset = int(self.crop_region.get("x1_rel") * width)
+                y_offset = int(self.crop_region.get("y1_rel") * height)
+
+                # Convert back to original image coordinates
+                xmin = min(width - 1, xmin + x_offset)
+                ymin = min(height - 1, ymin + y_offset)
+                xmax = min(width - 1, xmax + x_offset)
+                ymax = min(height - 1, ymax + y_offset)
+
             detection = {
                 "confidence": 0.5,
                 "class_name": "motion",
@@ -380,7 +397,7 @@ class MotionDetector(Vision, Reconfigurable):
 
     def crop_image(self, image: PIL.Image.Image):
         if not self.crop_region:
-            return image
+            return image, None, None
         else:
             width, height = image.size
             x1 = int(self.crop_region["x1_rel"] * width)
