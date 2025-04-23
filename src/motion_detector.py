@@ -103,6 +103,29 @@ class MotionDetector(Vision, Reconfigurable):
                 "Cannot specify the maximum box in both pixels and percentages"
             )
 
+        if config.attributes.fields["crop_region"].struct_value:
+            crop_region = dict(
+                config.attributes.fields["crop_region"].struct_value.fields
+            )
+            x1_rel = float(crop_region["x1_rel"].number_value)
+            x2_rel = float(crop_region["x2_rel"].number_value)
+            y1_rel = float(crop_region["y1_rel"].number_value)
+            y2_rel = float(crop_region["y2_rel"].number_value)
+
+            if x1_rel < 0.0 or x1_rel > 1.0:
+                raise ValueError("x1_rel should be between 0.0 and 1.0")
+            if x2_rel < 0.0 or x2_rel > 1.0:
+                raise ValueError("x2_rel should be between 0.0 and 1.0")
+            if y1_rel < 0.0 or y1_rel > 1.0:
+                raise ValueError("y1_rel should be between 0.0 and 1.0")
+            if y2_rel < 0.0 or y2_rel > 1.0:
+                raise ValueError("y2_rel should be between 0.0 and 1.0")
+            if x1_rel >= x2_rel:
+                raise ValueError("x1_rel should be less than x2_rel")
+            if x1_rel > x2_rel:
+                raise ValueError("x1_rel should be less than x2_rel")
+            if y1_rel > y2_rel:
+                raise ValueError("y1_rel should be less than y2_rel")
         return [source_cam]
 
     # Handles attribute reconfiguration
