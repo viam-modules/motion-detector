@@ -44,7 +44,10 @@ The following attributes are available for `viam:vision:motion-detector` vision 
 | `min_box_percent` | int | **Optional** | The fraction of the image (between 0 and 1) that the smallest bounding box must cover. Relevant for GetDetections/GetDetectionsFromCamera only. You must specify at most one of `min_box_size` and `min_box_percent`.
 | `max_box_size` | int | **Optional** | The size (in square pixels) of the largest bounding box to allow. Relevant for GetDetections/GetDetectionsFromCamera only. You must specify at most one of `max_box_size` and `max_box_percent`.
 | `max_box_percent` | int | **Optional** | The fraction of the image (between 0 and 1) that the largest bounding box can cover. Relevant for GetDetections/GetDetectionsFromCamera only. You must specify at most one of `max_box_size` and `max_box_percent`.
-| `sensitivity` | float | **Optional** | A number from 0 - 1. Larger numbers will make the module more sensitive to motion. Default = 0.9 |
+| `sensitivity` | float | **Optional**   | A number from 0 - 1. Larger numbers will make the module more sensitive to motion. Default = 0.9 
+| `crop_region` | dict   | **Optional**  | Defines a region of the image to crop for processing. Must include four float values between 0 and 1: `x1_rel`, `y1_rel`, `x2_rel`, `y2_rel` representing the relative coordinates of the crop region.|
+
+
 
 > [!WARNING]  
 > Either one of `camera_name` or `cam_name` will be accepted, but not both. `camera_name` is preferred.
