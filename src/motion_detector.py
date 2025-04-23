@@ -413,7 +413,6 @@ class MotionDetector(Vision, Reconfigurable):
                         "y_max_normalized": ymax / diff.shape[0],
                     }
                 )
-
             detections.append(detection)
 
         return detections
@@ -421,13 +420,12 @@ class MotionDetector(Vision, Reconfigurable):
     def crop_image(self, image: PIL.Image.Image):
         if not self.crop_region:
             return image, None, None
-        else:
-            width, height = image.size
-            x1 = int(self.crop_region["x1_rel"] * width)
-            y1 = int(self.crop_region["y1_rel"] * height)
-            x2 = int(self.crop_region["x2_rel"] * width)
-            y2 = int(self.crop_region["y2_rel"] * height)
-            return image.crop((x1, y1, x2, y2)), width, height
+        width, height = image.size
+        x1 = int(self.crop_region["x1_rel"] * width)
+        y1 = int(self.crop_region["y1_rel"] * height)
+        x2 = int(self.crop_region["x2_rel"] * width)
+        y2 = int(self.crop_region["y2_rel"] * height)
+        return image.crop((x1, y1, x2, y2)), width, height
 
     def retrieve_original_coordinates(self, x_normalized, y_normalized, width, height):
         pass
