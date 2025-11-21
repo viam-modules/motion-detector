@@ -172,7 +172,10 @@ class MotionDetector(Vision, Reconfigurable):
         **kwargs,
     ) -> List[Classification]:
         # Grab and grayscale 2 images
-        input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
+        images = await self.camera.get_images()
+        if len(images) == 0:
+            raise ValueError("No images returned by get_images")
+        input1 = images[0]
         if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
             raise ValueError(
                 "image mime type must be PNG or JPEG, not ", input1.mime_type
@@ -181,7 +184,10 @@ class MotionDetector(Vision, Reconfigurable):
         img1, _, _ = self.crop_image(img1)
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
-        input2 = await self.camera.get_image()
+        camera_images = await self.camera.get_images()
+        if len(camera_images) == 0:
+            raise ValueError("No images were returned by get_images")
+        input2 = camera_images[0]
         if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
             raise ValueError(
                 "image mime type must be PNG or JPEG, not ", input2.mime_type
@@ -222,7 +228,10 @@ class MotionDetector(Vision, Reconfigurable):
         **kwargs,
     ) -> List[Detection]:
         # Grab and grayscale 2 images
-        input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
+        images = await self.camera.get_images()
+        if len(images) == 0:
+            raise ValueError("No images returned by get_images")
+        input1 = images[0]
         if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
             raise ValueError(
                 "image mime type must be PNG or JPEG, not ", input1.mime_type
@@ -231,7 +240,10 @@ class MotionDetector(Vision, Reconfigurable):
         img1, width, height = self.crop_image(img1)
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
-        input2 = await self.camera.get_image()
+        camera_images = await self.camera.get_images()
+        if len(camera_images) == 0:
+            raise ValueError("No images were returned by get_images")
+        input2 = camera_images[0]
         if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
             raise ValueError(
                 "image mime type must be PNG or JPEG, not ", input2.mime_type
@@ -302,7 +314,10 @@ class MotionDetector(Vision, Reconfigurable):
                 "is not the configured 'cam_name':",
                 self.cam_name,
             )
-        img = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
+        imgs = await self.camera.get_images()
+        if len(imgs) == 0 and (return_image or return_classifications or return_detections):
+            raise ValueError("No images returned by get_images")
+        img = imgs[0]
         if return_image:
             result.image = img
         if return_classifications:
