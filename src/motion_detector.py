@@ -1,5 +1,5 @@
 import math
-from typing import Any, ClassVar, Dict, List, Mapping, Optional, Sequence
+from typing import Any, ClassVar, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import cv2
 import numpy as np
@@ -51,7 +51,7 @@ class MotionDetector(Vision, Reconfigurable):
 
     # Validates JSON Configuration
     @classmethod
-    def validate_config(cls, config: ServiceConfig) -> Sequence[str]:
+    def validate_config(cls, config: ServiceConfig) -> Tuple[Sequence[str], Sequence[str]]:
         validate_cam_name = config.attributes.fields["cam_name"].string_value
         validate_camera_name = config.attributes.fields["camera_name"].string_value
 
@@ -126,7 +126,7 @@ class MotionDetector(Vision, Reconfigurable):
                 raise ValueError("x1_rel should be less than x2_rel")
             if y1_rel > y2_rel:
                 raise ValueError("y1_rel should be less than y2_rel")
-        return [source_cam]
+        return [source_cam], []
 
     # Handles attribute reconfiguration
     def reconfigure(
