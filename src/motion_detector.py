@@ -40,6 +40,10 @@ class MotionDetector(Vision, Reconfigurable):
     def __init__(self, name: str):
         super().__init__(name=name)
 
+        # Cached grayscale frame from the previous call.
+        # This starts as None to explicitly represent "NO IMAGE YET".
+        self._last_gray = None
+
     # Constructor
     @classmethod
     def new_service(
@@ -160,6 +164,19 @@ class MotionDetector(Vision, Reconfigurable):
         else:
             self.crop_region = None
 
+        # If cache_image is true, this service will perform temporal differencing
+        # against the previously-seen frame instead of grabbing two frames per call.
+        #
+        # If the attribute is missing or false, we fall back to the original behavior.
+        cache_image_flag = config.attributes.fields.get("cache_image")
+        self.cache_image = bool(cache_image_flag.bool_value) if cache_image_flag else False
+
+        # Reconfiguration invalidates the cached frame:
+        # - camera may have changed
+        # - crop region may have changed
+        # - sensitivity may have changed
+        self._last_gray = None
+
     # This will be the main method implemented in this module.
     # Given a camera. Perform frame differencing and return how much of the image is moving
     async def get_classifications(
@@ -171,6 +188,28 @@ class MotionDetector(Vision, Reconfigurable):
         timeout: Optional[float] = None,
         **kwargs,
     ) -> List[Classification]:
+        # If caching is enabled, only grab a single image and compare it
+        # to the previously-cached frame.
+        if self.cache_image:
+            input_img = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
+            img = pil.viam_to_pil_image(input_img)
+            img, _, _ = self.crop_image(img)
+            gray = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2GRAY)
+
+            # If this is the first frame we have ever seen, there is no
+            # valid comparison to make yet.
+            if self._last_gray is None:
+                LOGGER.debug("No previous frame available; skipping motion detection classification")
+                self._last_gray = gray
+                return []
+            
+            # Perform motion detection by differencing the previous frame
+            # against the current frame.
+            result = self.classification_from_gray_imgs(self._last_gray, gray)
+            # Update the cache so the next call compares against this frame.
+            self._last_gray = gray
+            return result
+        
         # Grab and grayscale 2 images
         images, _ = await self.camera.get_images()
         if images is None or len(images) == 0:
@@ -227,6 +266,37 @@ class MotionDetector(Vision, Reconfigurable):
         timeout: Optional[float] = None,
         **kwargs,
     ) -> List[Detection]:
+        # If caching is enabled, only grab a single image and compare it
+        # to the previously-cached frame.
+        if self.cache_image:
+            input_img = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
+            if input_img.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
+                raise ValueError(
+                    "image mime type must be PNG or JPEG, not ", input_img.mime_type
+                )
+
+            img = pil.viam_to_pil_image(input_img)
+            img, width, height = self.crop_image(img)
+            gray = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2GRAY)
+
+            # If this is the first frame we have ever seen, there is no
+            # valid comparison to make yet.
+            if self._last_gray is None:
+                LOGGER.debug("No previous frame available; skipping motion detection detections")
+                self._last_gray = gray
+                return []
+
+            # Perform detection using frame differencing against
+            # the cached previous frame.
+            detections = self.detections_from_gray_imgs(
+                self._last_gray, gray, width, height
+            )
+
+            # Update the cache so the next call compares against this frame.
+            self._last_gray = gray
+            return detections
+
+
         # Grab and grayscale 2 images
         images, _ = await self.camera.get_images()
         if images is None or len(images) == 0:
