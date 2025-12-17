@@ -240,10 +240,10 @@ class MotionDetector(Vision, Reconfigurable):
         img1, width, height = self.crop_image(img1)
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
-        camera_images, _ = await self.camera.get_images()
-        if camera_images is None or len(camera_images) == 0:
+        camera_images2, _ = await self.camera.get_images()
+        if camera_images2 is None or len(camera_images2) == 0:
             raise ValueError("No images were returned by get_images")
-        input2 = camera_images[0]
+        input2 = camera_images2[0]
         if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
             raise ValueError(
                 "image mime type must be PNG or JPEG, not ", input2.mime_type
