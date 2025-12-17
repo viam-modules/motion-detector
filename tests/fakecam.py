@@ -22,7 +22,8 @@ class FakeCamera(Camera):
         return pil.pil_to_viam_image(self.images[self.count%2], CameraMimeType.JPEG)
 
     async def get_images(self) -> Coroutine[Any, Any, Tuple[List[NamedImage] | ResponseMetadata]]:
-        raise NotImplementedError
+        self.count +=1
+        return [pil.pil_to_viam_image(self.images[self.count%2], CameraMimeType.JPEG)], None
 
     async def get_properties(self) -> Coroutine[Any, Any, GetPropertiesResponse]:
         raise NotImplementedError
