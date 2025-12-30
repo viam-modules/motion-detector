@@ -18,8 +18,6 @@ from viam.resource.types import Model, ModelFamily
 from viam.services.vision import CaptureAllResult, Vision
 from viam.utils import ValueTypes
 
-LOGGER = getLogger("MotionDetectorLogger")
-
 
 class MotionDetector(Vision, Reconfigurable):
     """
@@ -39,6 +37,7 @@ class MotionDetector(Vision, Reconfigurable):
 
     def __init__(self, name: str):
         super().__init__(name=name)
+        self.logger = getLogger(__name__)
 
         # Cached grayscale frame from the previous call.
         # This starts as None to explicitly represent "NO IMAGE YET".
@@ -176,6 +175,20 @@ class MotionDetector(Vision, Reconfigurable):
         # - crop region may have changed
         # - sensitivity may have changed
         self._last_gray = None
+        self.logger.debug(
+            "MotionDetector reconfigured",
+            extra={
+                "camera_name": self.cam_name,
+                "sensitivity": self.sensitivity,
+                "cache_image": self.cache_image,
+                "min_box_size": self.min_box_size,
+                "min_box_percent": self.min_box_percent,
+                "max_box_size": self.max_box_size,
+                "max_box_percent": self.max_box_percent,
+                "crop_region": self.crop_region,
+            },
+        )
+
 
     # This will be the main method implemented in this module.
     # Given a camera. Perform frame differencing and return how much of the image is moving
@@ -191,6 +204,7 @@ class MotionDetector(Vision, Reconfigurable):
         # If caching is enabled, only grab a single image and compare it
         # to the previously-cached frame.
         if self.cache_image:
+            self.logger.debug("cache_image=True → grabbing SINGLE frame (Classification)")
             input_img = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
             img = pil.viam_to_pil_image(input_img)
             img, _, _ = self.crop_image(img)
@@ -199,7 +213,7 @@ class MotionDetector(Vision, Reconfigurable):
             # If this is the first frame we have ever seen, there is no
             # valid comparison to make yet.
             if self._last_gray is None:
-                LOGGER.debug("No previous frame available; skipping motion detection classification")
+                self.logger.debug("No previous frame available; skipping motion detection classification")
                 self._last_gray = gray
                 return []
             
@@ -211,6 +225,7 @@ class MotionDetector(Vision, Reconfigurable):
             return result
         
         # Grab and grayscale 2 images
+        self.logger.debug("cache_image=False → grabbing FIRST frame")
         input1 = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
         if input1.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
             raise ValueError(
@@ -220,6 +235,7 @@ class MotionDetector(Vision, Reconfigurable):
         img1, _, _ = self.crop_image(img1)
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
+        self.logger.debug("cache_image=False → grabbing SECOND frame")
         input2 = await self.camera.get_image()
         if input2.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
             raise ValueError(
@@ -263,6 +279,7 @@ class MotionDetector(Vision, Reconfigurable):
         # If caching is enabled, only grab a single image and compare it
         # to the previously-cached frame.
         if self.cache_image:
+            self.logger.debug("cache_image=True → grabbing SINGLE frame (Detection)")
             input_img = await self.camera.get_image(mime_type=CameraMimeType.JPEG)
             if input_img.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
                 raise ValueError(
@@ -276,7 +293,7 @@ class MotionDetector(Vision, Reconfigurable):
             # If this is the first frame we have ever seen, there is no
             # valid comparison to make yet.
             if self._last_gray is None:
-                LOGGER.debug("No previous frame available; skipping motion detection detections")
+                self.logger.debug("No previous frame available; skipping motion detection detections")
                 self._last_gray = gray
                 return []
 
