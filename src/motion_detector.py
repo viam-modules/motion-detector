@@ -204,8 +204,10 @@ class MotionDetector(Vision, Reconfigurable):
         # If caching is enabled, only grab a single image and compare it
         # to the previously-cached frame.
         if self.cache_image:
-            self.logger.debug("cache_image=True → grabbing SINGLE frame (Classification)")
-            images, meta = await self.camera.get_images()
+            self.logger.debug(
+                "cache_image=True → grabbing SINGLE frame (Classification)"
+                )
+            images, _ = await self.camera.get_images()
             if not images:
                 raise ValueError("No images returned by get_images")
             input_img = images[0]
@@ -217,20 +219,22 @@ class MotionDetector(Vision, Reconfigurable):
             # If this is the first frame we have ever seen, there is no
             # valid comparison to make yet.
             if self._last_gray is None:
-                self.logger.debug("No previous frame available; skipping motion detection classification")
+                self.logger.debug(
+                    "No previous frame available; skipping motion detection classification"
+                    )
                 self._last_gray = gray
                 return []
-            
+
             # Perform motion detection by differencing the previous frame
             # against the current frame.
             result = self.classification_from_gray_imgs(self._last_gray, gray)
             # Update the cache so the next call compares against this frame.
             self._last_gray = gray
             return result
-        
+
         # Grab and grayscale 2 images
         self.logger.debug("cache_image=False → grabbing FIRST frame")
-        images1, meta1 = await self.camera.get_images()
+        images1, _ = await self.camera.get_images()
         if not images1:
             raise ValueError("No images returned by get_images")
         input1 = images1[0]
@@ -243,7 +247,7 @@ class MotionDetector(Vision, Reconfigurable):
         gray1 = cv2.cvtColor(np.array(img1), cv2.COLOR_BGR2GRAY)
 
         self.logger.debug("cache_image=False → grabbing SECOND frame")
-        images2, meta2 = await self.camera.get_images()
+        images2, _ = await self.camera.get_images()
         if not images2:
             raise ValueError("No images returned by get_images")
         input2 = images2[0]
@@ -289,15 +293,18 @@ class MotionDetector(Vision, Reconfigurable):
         # If caching is enabled, only grab a single image and compare it
         # to the previously-cached frame.
         if self.cache_image:
-            self.logger.debug("cache_image=True → grabbing SINGLE frame (Detection)")
-            images, meta = await self.camera.get_images()
+            self.logger.debug(
+                "cache_image=True → grabbing SINGLE frame (Detection)"
+                )
+            images, _ = await self.camera.get_images()
             if not images:
                 raise ValueError("No images returned by get_images")
             input_img = images[0]
             if input_img.mime_type not in [CameraMimeType.JPEG, CameraMimeType.PNG]:
                 raise ValueError(
-                    "image mime type must be PNG or JPEG, not ", input_img.mime_type
+                    f"image mime type must be PNG or JPEG, not {input_img.mime_type}"
                 )
+
 
             img = pil.viam_to_pil_image(input_img)
             img, width, height = self.crop_image(img)
@@ -306,7 +313,9 @@ class MotionDetector(Vision, Reconfigurable):
             # If this is the first frame we have ever seen, there is no
             # valid comparison to make yet.
             if self._last_gray is None:
-                self.logger.debug("No previous frame available; skipping motion detection detections")
+                self.logger.debug(
+                    "No previous frame available; skipping motion detection detections"
+                    )
                 self._last_gray = gray
                 return []
 
