@@ -40,8 +40,9 @@ class MotionDetector(Vision, Reconfigurable):
         self.logger = getLogger(__name__)
 
         # Cached grayscale frame from the previous call.
-        # This starts as None to explicitly represent "NO IMAGE YET".
         self._last_gray = None
+        # Default behavior: preserve legacy behavior unless configured otherwise
+        self.cache_image = False
 
     # Constructor
     @classmethod
