@@ -1,9 +1,30 @@
-pillow == 11.0.0
-numpy == 1.26.4
-viam-sdk==0.44.1
+altgraph==0.17.5
+astroid==3.3.11
+dill==0.4.0
+dnspython==2.8.0
+googleapis-common-protos==1.72.0
+grpclib==0.4.9
+h2==4.3.0
+hpack==4.1.0
+hyperframe==6.1.0
+iniconfig==2.3.0
+isort==6.1.0
+mccabe==0.7.0
+multidict==6.7.0
+numpy==1.26.4
+opencv-python==4.9.0.80
+packaging==25.0
 parameterized==0.9.0
+pillow==11.0.0
+platformdirs==4.5.1
+pluggy==1.6.0
+protobuf==5.29.5
 pyinstaller==6.11.1
+pyinstaller-hooks-contrib==2025.10
 pylint==3.3.4
+pymongo==4.15.5
 pytest==8.3.4
 pytest-asyncio==0.25.3
-opencv-python == 4.9.0.80
+tomlkit==0.13.3
+typing_extensions==4.15.0
+viam-sdk==0.65.0
