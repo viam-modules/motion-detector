@@ -12,7 +12,7 @@ from viam.media.video import CameraMimeType, ViamImage
 from viam.module.types import Reconfigurable
 from viam.proto.app.robot import ServiceConfig
 from viam.proto.common import PointCloudObject, ResourceName
-from viam.proto.service.vision import Classification, Detection
+from viam.proto.service.vision import Classification, Detection, Detection3D
 from viam.resource.base import ResourceBase
 from viam.resource.types import Model, ModelFamily
 from viam.services.vision import CaptureAllResult, Vision
@@ -386,6 +386,15 @@ class MotionDetector(Vision, Reconfigurable):
     ) -> List[PointCloudObject]:
         raise NotImplementedError
 
+    async def get_detections_3d(
+        self,
+        camera_name: str,
+        *,
+        extra: Optional[Mapping[str, Any]] = None,
+        timeout: Optional[float] = None,
+    ) -> List[Detection3D]:
+        raise NotImplementedError
+
     async def get_properties(
         self,
         *,
@@ -406,6 +415,7 @@ class MotionDetector(Vision, Reconfigurable):
         return_classifications: bool = False,
         return_detections: bool = False,
         return_object_point_clouds: bool = False,
+        return_detections_3d: bool = False,
         *,
         extra: Optional[Mapping[str, Any]] = None,
         timeout: Optional[float] = None,
